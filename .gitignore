@@ -1,0 +1,9 @@
+/bin
+/obj
+/.vscode
+/.vs
+
+appsettings.json
+.dockerignore
+Dockerfile
+/ExamEdu.csproj.user
