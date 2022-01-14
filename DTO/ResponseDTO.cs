@@ -24,10 +24,7 @@ namespace ExamEdu.DTO
         };
 
         public ResponseDTO() { }
-/// <summary>
-/// ///
-/// </summary>
-/// <param name="Status"></param>
+
         public ResponseDTO(int Status)
         {
             this.Status = Status;
