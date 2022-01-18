@@ -1,0 +1,24 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace ExamEdu.DB.Models
+{
+    public class Class
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ClassId { get; set; }
+        public string ClassName { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime StartDay { get; set; } = DateTime.Now;
+        public DateTime EndDay { get; set; }
+        public bool IsDeactivated { get; set; } = false;
+        public DateTime? DeactivatedAt { get; set; }
+
+        // Many-Many module
+        public ICollection<Module> Modules { get; set; }
+        public ICollection<ClassModule> ClassModules { get; set; }
+    }
+}
