@@ -12,7 +12,6 @@ namespace ExamEdu.DB.Models
         public string Password { get; set; }
         public string Fullname { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public bool IsDeactivated { get; set; } = false;
         public DateTime? DeactivatedAt { get; set; }
 
         // Many student - one role
@@ -21,7 +20,7 @@ namespace ExamEdu.DB.Models
 
         // Many-Many exam
         public ICollection<Exam> Exams { get; set; }
-        public ICollection<ExamMark> ExamMarks { get; set; }
+        public ICollection<StudentExamInfo> StudentExamInfos { get; set; }
 
         public ICollection<StudentAnswer> StudentAnswers { get; set; }
         public ICollection<StudentFEAnswer> StudentFEAnswers { get; set; }

@@ -10,8 +10,7 @@ namespace ExamEdu.DB.Models
         public int QuestionId { get; set; }
         public string QuestionContent { get; set; }
         public string QuestionImageURL { get; set; }
-        public bool isApproved { get; set; }
-        public DateTime ApproveAt { get; set; } = DateTime.Now;
+        public DateTime? ApproveAt { get; set; } 
         public string Comment { get; set; }
 
         // Many question - one level

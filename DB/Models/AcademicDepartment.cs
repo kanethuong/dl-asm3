@@ -11,7 +11,6 @@ namespace ExamEdu.DB.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public bool IsDeactivated { get; set; } = false;
         public DateTime? DeactivatedAt { get; set; }
 
         // Many aca - one role
