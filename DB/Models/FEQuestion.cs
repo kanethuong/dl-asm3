@@ -11,7 +11,7 @@ namespace ExamEdu.DB.Models
         public string QuestionContent { get; set; }
         public string QuestionImageURL { get; set; }
         public bool isApproved { get; set; }
-        public DateTime ApproveAt { get; set; } = DateTime.Now;
+        public DateTime? ApproveAt { get; set; } 
 
         // Many question - one level
         public int LevelId { get; set; }

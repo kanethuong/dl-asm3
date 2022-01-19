@@ -29,7 +29,7 @@ namespace ExamEdu.DB.Models
         public Module Module { get; set; }
 
         // Many-Many Student
-        public ICollection<ExamMark> ExamMarks { get; set; }
+        public ICollection<StudentExamInfo> StudentExamInfos { get; set; }
         public ICollection<Student> Students { get; set; }
 
         // Many-Many Question

@@ -20,7 +20,7 @@ namespace ExamEdu.DB
         public DbSet<ClassModule> ClassModules { get; set; }
         public DbSet<Class_Module_Student> Class_Module_Students { get; set; }
         public DbSet<Exam> Exams { get; set; }
-        public DbSet<ExamMark> ExamMarks { get; set; }
+        public DbSet<StudentExamInfo> StudentExamInfos { get; set; }
         public DbSet<ExamQuestion> ExamQuestions { get; set; }
         public DbSet<Exam_FEQuestion> Exam_FEQuestions { get; set; }
         public DbSet<Level> Levels { get; set; }
@@ -129,7 +129,7 @@ namespace ExamEdu.DB
                 );
             // set unique for examId and questionId in examQuestion
             modelBuilder.Entity<ExamQuestion>()
-                .HasIndex(eq => new { eq.ExamId, eq.QuestionId })
+                .HasIndex(eq => new { eq.ExamId, eq.QuestionId, eq.ExamCode })
                 .IsUnique();
 
             // Connect many-many relationship of FE exam and question 
@@ -150,7 +150,7 @@ namespace ExamEdu.DB
                 );
             // set unique for examId and questionId in examQuestion
             modelBuilder.Entity<Exam_FEQuestion>()
-                .HasIndex(eq => new { eq.ExamId, eq.FEQuestionId })
+                .HasIndex(eq => new { eq.ExamId, eq.FEQuestionId, eq.ExamCode })
                 .IsUnique();    
 
             // connect exam question to student answer
@@ -171,14 +171,14 @@ namespace ExamEdu.DB
             modelBuilder.Entity<Exam>()
                 .HasMany(c => c.Students)
                 .WithMany(m => m.Exams)
-                .UsingEntity<ExamMark>(
+                .UsingEntity<StudentExamInfo>(
                     j => j
                         .HasOne(cm => cm.Student)
-                        .WithMany(m => m.ExamMarks)
+                        .WithMany(m => m.StudentExamInfos)
                         .HasForeignKey(cm => cm.StudentId),
                     j => j
                         .HasOne(cm => cm.Exam)
-                        .WithMany(c => c.ExamMarks)
+                        .WithMany(c => c.StudentExamInfos)
                         .HasForeignKey(cm => cm.ExamId),
                     j =>
                     {
@@ -296,7 +296,6 @@ namespace ExamEdu.DB
                .WithOne(a => a.Requester)
                .HasForeignKey(a => a.RequesterId)
                .OnDelete(DeleteBehavior.SetNull);      
-               //Them quyen duyet de cho teacher      
 
                
         }
