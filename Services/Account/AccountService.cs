@@ -11,6 +11,7 @@ using ExamEdu.DB.Models;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Helper;
 using kroniiapi.Helper;
+using Microsoft.EntityFrameworkCore;
 
 namespace examedu.Services.Account
 {
@@ -170,7 +171,7 @@ namespace examedu.Services.Account
                     studentToAdd.RoleId = accountInput.RoleID;
                     studentToAdd.Password = processPasswordAndSendEmail(studentToAdd.Email);
                     _dataContext.Students.Add(studentToAdd);
-                    if(await _dataContext.SaveChangesAsync() !=1)
+                    if (await _dataContext.SaveChangesAsync() != 1)
                     {
                         return -1;
                     }
@@ -183,7 +184,7 @@ namespace examedu.Services.Account
                     teacherToAdd.RoleId = accountInput.RoleID;
                     teacherToAdd.Password = processPasswordAndSendEmail(teacherToAdd.Email);
                     _dataContext.Teachers.Add(teacherToAdd);
-                    if(await _dataContext.SaveChangesAsync() !=1)
+                    if (await _dataContext.SaveChangesAsync() != 1)
                     {
                         return -1;
                     }
@@ -196,7 +197,7 @@ namespace examedu.Services.Account
                     academicDepartToAdd.RoleId = accountInput.RoleID;
                     academicDepartToAdd.Password = processPasswordAndSendEmail(academicDepartToAdd.Email);
                     _dataContext.AcademicDepartments.Add(academicDepartToAdd);
-                    if(await _dataContext.SaveChangesAsync() !=1)
+                    if (await _dataContext.SaveChangesAsync() != 1)
                     {
                         return -1;
                     }
@@ -206,6 +207,48 @@ namespace examedu.Services.Account
                     }
                 default:
                     return -1;
+            }
+        }
+
+        /// <summary>
+        /// Deactivate base on role
+        /// </summary>
+        /// <param name="id">id of user</param>
+        /// <param name="role">role of user</param>
+        /// <returns>-1:Already Deactivated / 0:fail / 1:success</returns>
+        public async Task<int> DeactivateAccount(int id, int roleID)
+        {
+            switch (roleID)
+            {
+                case 1:
+                    var studentToDeActivate = await _dataContext.Students.Where(s =>
+                         s.DeactivatedAt == null && s.StudentId == id).FirstOrDefaultAsync();
+                    if (studentToDeActivate == null)
+                    {
+                        return -1;
+                    }
+                    studentToDeActivate.DeactivatedAt = DateTime.Now;
+                    return await _dataContext.SaveChangesAsync();
+                case 2:
+                    var teacherToDeActivate = await _dataContext.Teachers.Where(s =>
+                         s.DeactivatedAt == null && s.TeacherId == id).FirstOrDefaultAsync();
+                    if (teacherToDeActivate == null)
+                    {
+                        return -1;
+                    }
+                    teacherToDeActivate.DeactivatedAt = DateTime.Now;
+                    return await _dataContext.SaveChangesAsync();
+                case 3:
+                    var AcademicDepartToDeActivate = await _dataContext.AcademicDepartments.Where(s =>
+                         s.DeactivatedAt == null && s.AcademicDepartmentId == id).FirstOrDefaultAsync();
+                    if (AcademicDepartToDeActivate == null)
+                    {
+                        return -1;
+                    }
+                    AcademicDepartToDeActivate.DeactivatedAt = DateTime.Now;
+                    return await _dataContext.SaveChangesAsync();
+                default:
+                    return 0;
             }
         }
     }
