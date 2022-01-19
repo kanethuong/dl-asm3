@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using examedu.Services.Account;
 using ExamEdu.DB;
 using ExamEdu.DTO;
 using Microsoft.AspNetCore.Builder;
@@ -48,6 +49,7 @@ namespace ExamEdu
             
             // Map data from Model to DTO and back
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+             services.AddScoped<IAccountService, AccountService>();
             
             services.AddControllers().AddJsonOptions(options =>
             {
@@ -98,10 +100,10 @@ namespace ExamEdu
             var frontEndUrl = Configuration["FrontEndUrl"];
 
             //CORS config for Front-end url
-            app.UseCors(options => options.WithOrigins(frontEndDevUrl, frontEndUrl)
-                                        .AllowAnyMethod()
-                                        .AllowAnyHeader()
-                                        .AllowCredentials());
+            // app.UseCors(options => options.WithOrigins(frontEndDevUrl, frontEndUrl)
+            //                             .AllowAnyMethod()
+            //                             .AllowAnyHeader()
+            //                             .AllowCredentials());
 
             // ReFormat error message
             app.Use(async (context, next) =>
