@@ -97,13 +97,13 @@ namespace ExamEdu
             var frontEndDevUrl = Configuration["FrontEndDevUrl"];
 
             //Get front-end url from appsettings.json
-            var frontEndUrl = Configuration["FrontEndUrl"];
+            // var frontEndUrl = Configuration["FrontEndUrl"];
 
             //CORS config for Front-end url
-            // app.UseCors(options => options.WithOrigins(frontEndDevUrl, frontEndUrl)
-            //                             .AllowAnyMethod()
-            //                             .AllowAnyHeader()
-            //                             .AllowCredentials());
+            app.UseCors(options => options.WithOrigins(frontEndDevUrl)
+                                        .AllowAnyMethod()
+                                        .AllowAnyHeader()
+                                        .AllowCredentials());
 
             // ReFormat error message
             app.Use(async (context, next) =>
