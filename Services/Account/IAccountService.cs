@@ -11,5 +11,6 @@ namespace examedu.Services.Account
     {
         Tuple<int, IEnumerable<AccountResponse>> GetAccountList(PaginationParameter paginationParameter);
         Tuple<int, IEnumerable<AccountResponse>> GetDeactivatedAccountList(PaginationParameter paginationParameter);
+        Task<int> InsertNewAccount(AccountInput accountInput);
     }
 }

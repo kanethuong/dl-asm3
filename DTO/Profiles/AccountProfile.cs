@@ -15,6 +15,11 @@ namespace examedu.DTO.Profiles
             CreateMap<Student, AccountResponse>().ForMember(ac => ac.ID, s => s.MapFrom(st => st.StudentId));
             CreateMap<AcademicDepartment, AccountResponse>().ForMember(ac => ac.ID, s => s.MapFrom(st => st.AcademicDepartmentId));
             CreateMap<Teacher, AccountResponse>().ForMember(ac => ac.ID, s => s.MapFrom(st => st.TeacherId));
+
+            CreateMap<AccountInput, Student>();
+            CreateMap<AccountInput, Teacher>();
+            CreateMap<AccountInput, AcademicDepartment>();
+            CreateMap<AccountInput, Administrator>();
         }
     }
 }

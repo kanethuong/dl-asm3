@@ -10,6 +10,7 @@ using ExamEdu.DB;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Helper;
+using kroniiapi.Helper;
 
 namespace examedu.Services.Account
 {
@@ -32,7 +33,7 @@ namespace examedu.Services.Account
                         .Replace('\u0111', 'd').Replace('\u0110', 'D');
         }
 
-        private  IEnumerable<AccountResponse> addAccountToTotalList(
+        private IEnumerable<AccountResponse> addAccountToTotalList(
         IEnumerable<Student> students, IEnumerable<AcademicDepartment> AcademicDepartments, IEnumerable<Teacher> teachers)
         {
             List<AccountResponse> totalAccount = new List<AccountResponse>();
@@ -59,7 +60,11 @@ namespace examedu.Services.Account
             return totalAccount;
         }
 
-
+        /// <summary>
+        /// get all account in all role exepct admin
+        /// </summary>
+        /// <param name="paginationParameter"></param>
+        /// <returns></returns>
         public Tuple<int, IEnumerable<AccountResponse>> GetAccountList(PaginationParameter paginationParameter)
         {
             string searchName = paginationParameter.SearchName;
@@ -82,6 +87,12 @@ namespace examedu.Services.Account
             return Tuple.Create(totalAccount.Count(), PaginationHelper.GetPage(totalAccount,
                 paginationParameter.PageSize, paginationParameter.PageNumber));
         }
+
+        /// <summary>
+        /// get all DeactivatedAccount in all role except admin
+        /// </summary>
+        /// <param name="paginationParameter"></param>
+        /// <returns></returns>
         public Tuple<int, IEnumerable<AccountResponse>> GetDeactivatedAccountList(PaginationParameter paginationParameter)
         {
             string searchName = paginationParameter.SearchName;
@@ -103,6 +114,99 @@ namespace examedu.Services.Account
 
             return Tuple.Create(totalAccount.Count(), PaginationHelper.GetPage(totalAccount,
                 paginationParameter.PageSize, paginationParameter.PageNumber));
+        }
+
+        // private void sendEmail(string email, string password)
+        // {
+        //     EmailContent emailContent = new EmailContent();
+        //     emailContent.IsBodyHtml = true;
+        //     emailContent.ToEmail = email;
+        //     emailContent.Subject = "[EXAMEDU] Your password";
+        //     emailContent.Body = password;
+        //     _emailService.SendEmailAsync(emailContent);
+        // }
+
+        private string processPasswordAndSendEmail(string email)
+        {
+            string password = AutoGeneratorPassword.passwordGenerator(15, 5, 5, 5);
+
+            //sendEmail(email, password);
+            password = BCrypt.Net.BCrypt.HashPassword(password);
+
+            return password;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accountInput"></param>
+        /// <returns>1 if sucess / 0 if fail(duplicate email) / -1 all other fail (invalid role...)</returns>
+        public async Task<int> InsertNewAccount(AccountInput accountInput)
+        {
+            PaginationParameter paginationParameter = new PaginationParameter { PageNumber = 1, PageSize = 1, SearchName = accountInput.Email };
+            if (GetAccountList(paginationParameter).Item1 == 1 || GetDeactivatedAccountList(paginationParameter).Item1 == 1)
+            {
+                return 0;
+            }
+
+            switch (accountInput.RoleID)
+            {
+                //CASE NAY CHI DUNG KHI MUON TAO TAI KHOAN ADMIN KO BO CMT CASE NAY
+                // case 0:
+                //     var adminToAdd = _mapper.Map<Administrator>(accountInput);
+                //     adminToAdd.RoleId = accountInput.RoleID;
+                //     adminToAdd.Password = processPasswordAndSendEmail(adminToAdd.Email);
+                //     _dataContext.Administrators.Add(adminToAdd);
+                //     if(await _dataContext.SaveChangesAsync() !=1)
+                //     {
+                //         return -1;
+                //     }
+                //     else
+                //     {
+                //         return 1;
+                //     }
+                case 1:
+                    var studentToAdd = _mapper.Map<Student>(accountInput);
+                    studentToAdd.RoleId = accountInput.RoleID;
+                    studentToAdd.Password = processPasswordAndSendEmail(studentToAdd.Email);
+                    _dataContext.Students.Add(studentToAdd);
+                    if(await _dataContext.SaveChangesAsync() !=1)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                case 2:
+                    var teacherToAdd = _mapper.Map<Teacher>(accountInput);
+                    teacherToAdd.RoleId = accountInput.RoleID;
+                    teacherToAdd.Password = processPasswordAndSendEmail(teacherToAdd.Email);
+                    _dataContext.Teachers.Add(teacherToAdd);
+                    if(await _dataContext.SaveChangesAsync() !=1)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                case 3:
+                    var academicDepartToAdd = _mapper.Map<AcademicDepartment>(accountInput);
+                    academicDepartToAdd.RoleId = accountInput.RoleID;
+                    academicDepartToAdd.Password = processPasswordAndSendEmail(academicDepartToAdd.Email);
+                    _dataContext.AcademicDepartments.Add(academicDepartToAdd);
+                    if(await _dataContext.SaveChangesAsync() !=1)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                default:
+                    return -1;
+            }
         }
     }
 }
