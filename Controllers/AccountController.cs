@@ -79,5 +79,27 @@ namespace examedu.Controllers
             }
             return CreatedAtAction(nameof(GetAccountList), new ResponseDTO(201, "Successfully inserted"));
         }
+
+                /// <summary>
+        /// Deactivate an account in the db
+        /// </summary>
+        /// <param name="id">Id of that account</param>
+        /// <param name="role">Role of that account</param>
+        /// <returns>200: Deleted / 404: Id not found</returns>
+        [HttpDelete("{id:int}/{role:int}")]
+        public async Task<ActionResult> DeactivateAccount(int id, int role)
+        {
+            int result = await _accountService.DeactivateAccount(id, role);
+
+            if (result == -1)
+            {
+                return NotFound(new ResponseDTO(404, "Id not found!"));
+            }
+            if (result == 0)
+            {
+                return BadRequest(new ResponseDTO(409, "Deactivate faile"));
+            }
+            return Ok(new ResponseDTO(200, "Deleted!"));
+        }
     }
 }
