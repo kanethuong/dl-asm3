@@ -185,12 +185,16 @@ namespace ExamEdu.DB
                         j.HasKey(cm => new { cm.StudentId, cm.ExamId });
                     }
                 );
+            // set unique for examName in exam
+            modelBuilder.Entity<Exam>()
+                .HasIndex(eq => eq.ExamName)
+                .IsUnique();    
 
-            // Connect class module to exam
+            // Connect module to exam
             modelBuilder.Entity<Module>()
                .HasMany(r => r.Exams)
                .WithOne(a => a.Module)
-               .HasForeignKey(a => a.ExamId)
+               .HasForeignKey(a => a.ModuleId)
                .OnDelete(DeleteBehavior.SetNull);    
 
             // Connect level to question
