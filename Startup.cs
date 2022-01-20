@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using examedu.Services;
 using examedu.Services.Account;
 using ExamEdu.DB;
 using ExamEdu.DTO;
@@ -49,8 +50,9 @@ namespace ExamEdu
             
             // Map data from Model to DTO and back
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-             services.AddScoped<IAccountService, AccountService>();
-            
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IStudentService, StudentService>();
+
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
