@@ -6,7 +6,7 @@ using AutoMapper;
 using examedu.Services;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
-using ExamEdu.DTO.ExamDTO;
+using ExamEdu.DTO.ModuleDTO;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -15,32 +15,33 @@ namespace ExamEdu.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ExamController : ControllerBase
+    public class ModuleController : ControllerBase
     {
-        private readonly IExamService _examService;
+         private readonly IModuleService _moduleService;
         private readonly IStudentService _studentService;
         private readonly IMapper _mapper;        
-        public ExamController(IExamService examService,IMapper mapper,IStudentService studentService)
+        public ModuleController(IModuleService moduleService,IMapper mapper,IStudentService studentService)
         {
-            _examService = examService;
+            _moduleService = moduleService;
             _mapper = mapper;
             _studentService = studentService;
         }
         [HttpGet("{studentId:int}")]
-        public async Task<IActionResult> GetExamScheduleByStudentId(int studentId,[FromQuery] PaginationParameter paginationParameter)
+        public async Task<IActionResult> ViewModuleStudentHaveExam(int studentId,[FromQuery]PaginationParameter paginationParameter)
         {
             bool isStudentExist = _studentService.CheckStudentExist(studentId);
             if(isStudentExist==false){
                 return NotFound(new ResponseDTO(404, "Student not found"));
             }
-            (int totalRecord, IEnumerable<Exam> examSchedules) = await _examService.getExamByStudentId(studentId,paginationParameter);
-            
+            (int totalRecord, IEnumerable<Module> modules)  =
+                            await _moduleService.getAllModuleStudentHaveExam(studentId,paginationParameter);
             if (totalRecord == 0)
             {
-                return NotFound(new ResponseDTO(404, "Student doesn't have exam schedules"));
+                return NotFound(new ResponseDTO(404, "Student doesn't have exam on any module"));
             }
-            IEnumerable<ExamScheduleResponse> examScheduleResponses = _mapper.Map<IEnumerable<ExamScheduleResponse>>(examSchedules);
-            return Ok(new PaginationResponse<IEnumerable<ExamScheduleResponse>>(totalRecord, examScheduleResponses));
+            IEnumerable<ModuleResponse> modulesResponses = _mapper.Map<IEnumerable<ModuleResponse>>(modules);
+
+            return Ok(new PaginationResponse<IEnumerable<ModuleResponse>>(totalRecord, modulesResponses));
         }
         
     }

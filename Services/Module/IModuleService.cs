@@ -7,8 +7,8 @@ using ExamEdu.DTO.PaginationDTO;
 
 namespace ExamEdu.Services
 {
-    public interface IExamService
+    public interface IModuleService
     {
-        Task<Tuple<int, IEnumerable<Exam>>> getExamByStudentId(int studentId, PaginationParameter paginationParameter);
+        Task<Tuple<int, IEnumerable<Module>>> getAllModuleStudentHaveExam(int studentId,PaginationParameter paginationParameter);
     }
 }
