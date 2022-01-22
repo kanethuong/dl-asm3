@@ -12,9 +12,8 @@ namespace ExamEdu.DB.Models
         public int ClassId { get; set; }
         public string ClassName { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime StartDay { get; set; } = DateTime.Now;
+        public DateTime StartDay { get; set; } 
         public DateTime EndDay { get; set; }
-        public bool IsDeactivated { get; set; } = false;
         public DateTime? DeactivatedAt { get; set; }
 
         // Many-Many module

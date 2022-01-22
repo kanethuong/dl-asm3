@@ -7,6 +7,7 @@ using examedu.Services;
 using examedu.Services.Account;
 using ExamEdu.DB;
 using ExamEdu.DTO;
+using ExamEdu.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -52,6 +53,7 @@ namespace ExamEdu
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<IExamService, ExamService>();
 
             services.AddControllers().AddJsonOptions(options =>
             {

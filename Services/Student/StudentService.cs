@@ -81,5 +81,10 @@ namespace examedu.Services
             }
             return listToRetrun;
         }
+        public bool CheckStudentExist(int id)
+        {
+            return _dataContext.Students.Any(t => t.StudentId == id &&
+           t.DeactivatedAt == null);
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace examedu.Services
     public interface IStudentService
     {
         Task<List<ModuleMarkDTO>> getModuleMark(int studentID, int moduleID);
+        bool CheckStudentExist(int id);
     }
 }
