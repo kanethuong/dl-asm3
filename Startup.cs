@@ -54,6 +54,7 @@ namespace ExamEdu
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<IExamService, ExamService>();
+            services.AddScoped<IModuleService, ModuleService>();
 
             services.AddControllers().AddJsonOptions(options =>
             {

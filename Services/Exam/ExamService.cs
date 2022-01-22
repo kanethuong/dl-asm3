@@ -18,7 +18,13 @@ namespace ExamEdu.Services
         {
             _db = dataContext;
         }
-        public async Task<Tuple<int, List<Exam>>> getExamByStudentId(int studentId, PaginationParameter paginationParameter)
+        /// <summary>
+        /// Get Exam Schedule of student, which have Exam day > now
+        /// </summary>
+        /// <param name="studentId"></param>
+        /// <param name="paginationParameter"></param>
+        /// <returns></returns>
+        public async Task<Tuple<int, IEnumerable<Exam>>> getExamByStudentId(int studentId, PaginationParameter paginationParameter)
         {
             var allExamOfStudent = await _db.StudentExamInfos.Where(e => e.StudentId == studentId).Select(e => e.ExamId).ToListAsync();
             if (allExamOfStudent.Count() == 0)
@@ -34,8 +40,7 @@ namespace ExamEdu.Services
                 }
             }
             
-            // if exam list count == 0 return null
-            return Tuple.Create(examList.Count, examList) ;
+            return Tuple.Create(examList.Count, examList.GetPage(paginationParameter)) ;
         }
     }
 }
