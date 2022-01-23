@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using examedu.Services;
 using examedu.Services.Account;
+using examedu.Services.Question;
 using ExamEdu.DB;
 using ExamEdu.DTO;
 using ExamEdu.Services;
@@ -55,6 +56,8 @@ namespace ExamEdu
             services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<IExamService, ExamService>();
             services.AddScoped<IModuleService, ModuleService>();
+            services.AddScoped<IQuestionService, QuestionService>();
+            services.AddScoped<ILevelService, LevelService>();
 
             services.AddControllers().AddJsonOptions(options =>
             {

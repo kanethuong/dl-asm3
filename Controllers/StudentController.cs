@@ -19,6 +19,12 @@ namespace examedu.Controllers
             _studentService = studentService;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="studentId"></param>
+        /// <param name="moduleId"></param>
+        /// <returns>400 student or moduleID not exist / 404 Student dont have exam</returns>
         [HttpGet("markReport/{studentID:int}/{moduleID:int}")]
         public async Task<ActionResult<List<ModuleMarkDTO>>> DeactivateAccount(int studentId, int moduleId)
         {

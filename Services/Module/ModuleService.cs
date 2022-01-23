@@ -42,5 +42,10 @@ namespace ExamEdu.Services
             return Tuple.Create(moduleList.Count, moduleList.GetPage(paginationParameter));
 
         }
+
+        public async Task<Module> getModuleByID(int id)
+        {
+            return await _db.Modules.Where(m => m.ModuleId == id).FirstOrDefaultAsync();
+        }
     }
 }
