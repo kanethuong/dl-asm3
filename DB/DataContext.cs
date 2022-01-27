@@ -196,7 +196,10 @@ namespace ExamEdu.DB
                .WithOne(a => a.Module)
                .HasForeignKey(a => a.ModuleId)
                .OnDelete(DeleteBehavior.SetNull);    
-
+            // set unique for moduleCode in module
+            modelBuilder.Entity<Module>()
+                .HasIndex(eq => eq.ModuleCode)
+                .IsUnique();        
             // Connect level to question
             modelBuilder.Entity<Level>()
                .HasMany(r => r.Questions)
