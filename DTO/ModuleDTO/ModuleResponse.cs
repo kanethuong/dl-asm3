@@ -8,6 +8,7 @@ namespace ExamEdu.DTO.ModuleDTO
     public class ModuleResponse
     {
         public int ModuleId { get; set; }
+        public string ModuleCode { get; set; }
         public string ModuleName { get; set; }
     }
 }
