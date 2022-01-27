@@ -33,7 +33,7 @@ namespace examedu.Services.Question
             if (isFinalExam)
             {
                 var QuestionListFromDB = await _dataContext.FEQuestions.Where(q =>
-                    q.ModuleId == moduleID && q.LevelId == levelID).ToListAsync();
+                    q.ModuleId == moduleID && q.LevelId == levelID && q.ApproveAt != null).ToListAsync();
                 foreach (var question in QuestionListFromDB)
                 {
                     //return await _db.Answers.Where(a => a.QuestionId == questionID).ToListAsync();
@@ -45,7 +45,7 @@ namespace examedu.Services.Question
             else
             {
                 var QuestionListFromDB = await _dataContext.Questions.Where(q =>
-                    q.ModuleId == moduleID && q.LevelId == levelID).ToListAsync();
+                    q.ModuleId == moduleID && q.LevelId == levelID && q.ApproveAt != null).ToListAsync();
                 foreach (var question in QuestionListFromDB)
                 {
                     QuestionResponse questionResponse = _mapper.Map<QuestionResponse>(question);

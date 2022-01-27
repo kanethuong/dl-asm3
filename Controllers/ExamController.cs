@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using examedu.DTO.ExamDTO;
 using examedu.Services;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
@@ -19,22 +20,23 @@ namespace ExamEdu.Controllers
     {
         private readonly IExamService _examService;
         private readonly IStudentService _studentService;
-        private readonly IMapper _mapper;        
-        public ExamController(IExamService examService,IMapper mapper,IStudentService studentService)
+        private readonly IMapper _mapper;
+        public ExamController(IExamService examService, IMapper mapper, IStudentService studentService)
         {
             _examService = examService;
             _mapper = mapper;
             _studentService = studentService;
         }
         [HttpGet("{studentId:int}")]
-        public async Task<IActionResult> GetExamScheduleByStudentId(int studentId,[FromQuery] PaginationParameter paginationParameter)
+        public async Task<IActionResult> GetExamScheduleByStudentId(int studentId, [FromQuery] PaginationParameter paginationParameter)
         {
             bool isStudentExist = _studentService.CheckStudentExist(studentId);
-            if(isStudentExist==false){
+            if (isStudentExist == false)
+            {
                 return NotFound(new ResponseDTO(404, "Student not found"));
             }
-            (int totalRecord, IEnumerable<Exam> examSchedules) = await _examService.getExamByStudentId(studentId,paginationParameter);
-            
+            (int totalRecord, IEnumerable<Exam> examSchedules) = await _examService.getExamByStudentId(studentId, paginationParameter);
+
             if (totalRecord == 0)
             {
                 return NotFound(new ResponseDTO(404, "Student doesn't have exam schedules"));
@@ -42,6 +44,24 @@ namespace ExamEdu.Controllers
             IEnumerable<ExamScheduleResponse> examScheduleResponses = _mapper.Map<IEnumerable<ExamScheduleResponse>>(examSchedules);
             return Ok(new PaginationResponse<IEnumerable<ExamScheduleResponse>>(totalRecord, examScheduleResponses));
         }
-        
+
+        [HttpPost("byHand")]
+        public async Task<IActionResult> CreateExamByHand(CreateExamByHandInput input)
+        {
+            if (_examService.getExamById(input.ExamId) is null)
+            {
+                return BadRequest(new ResponseDTO(400, "Exam not existed"));
+            }
+            int status = await _examService.CreateExamPaperByHand(input);
+            if (status == 1)
+            {
+                return Created(nameof(CreateExamByHand), new ResponseDTO(201, "Successfully inserted")); //se doi khi co method phu hop
+            }
+            if (status == -1)
+            {
+                return BadRequest(new ResponseDTO(400, "Question number is lower than expected"));
+            }
+            return BadRequest(new ResponseDTO(400, "Error when create exam paper"));
+        }
     }
 }
