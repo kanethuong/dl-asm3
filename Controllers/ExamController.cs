@@ -45,10 +45,15 @@ namespace ExamEdu.Controllers
             return Ok(new PaginationResponse<IEnumerable<ExamScheduleResponse>>(totalRecord, examScheduleResponses));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns>201: success  / 400 error when insert</returns>
         [HttpPost("byHand")]
         public async Task<IActionResult> CreateExamByHand(CreateExamByHandInput input)
         {
-            if (_examService.getExamById(input.ExamId) is null)
+            if (await _examService.getExamById(input.ExamId) is null)
             {
                 return BadRequest(new ResponseDTO(400, "Exam not existed"));
             }
@@ -60,6 +65,25 @@ namespace ExamEdu.Controllers
             if (status == -1)
             {
                 return BadRequest(new ResponseDTO(400, "Question number is lower than expected"));
+            }
+            return BadRequest(new ResponseDTO(400, "Error when create exam paper"));
+        }
+
+        [HttpPost("autoGenerate")]
+        public async Task<IActionResult> CreateExamAuto(CreateExamAutoInput input)
+        {
+            if(await _examService.getExamById(input.ExamId) is null)
+            {
+                return BadRequest(new ResponseDTO(400, "Exam not existed"));
+            }
+            int status = await _examService.CreateExamPaperAuto(input);
+            if (status == 1)
+            {
+                return Created(nameof(CreateExamByHand), new ResponseDTO(201, "Successfully inserted")); //se doi khi co method phu hop
+            }
+            if (status == -1)
+            {
+                return BadRequest(new ResponseDTO(400, "Question number in bank is lower than expected"));
             }
             return BadRequest(new ResponseDTO(400, "Error when create exam paper"));
         }

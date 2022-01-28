@@ -12,6 +12,7 @@ namespace ExamEdu.Services
     {
         Task<Tuple<int, IEnumerable<Exam>>> getExamByStudentId(int studentId, PaginationParameter paginationParameter);
         Task<int> CreateExamPaperByHand(CreateExamByHandInput input);
+        Task<int> CreateExamPaperAuto(CreateExamAutoInput input);
         Task<Exam> getExamById(int id);
     }
 }
