@@ -86,5 +86,15 @@ namespace examedu.Services
             return _dataContext.Students.Any(t => t.StudentId == id &&
            t.DeactivatedAt == null);
         }
+
+        /// <summary>
+        /// Get a student by its email
+        /// </summary>
+        /// <param name="email">student email</param>
+        /// <returns></returns>
+        public async Task<Student> GetStudentByEmail(string email)
+        {
+            return await _dataContext.Students.Where(s => s.Email.ToLower().Equals(email.ToLower()) && s.DeactivatedAt == null).FirstOrDefaultAsync();
+        }
     }
 }

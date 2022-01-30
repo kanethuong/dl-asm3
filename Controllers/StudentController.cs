@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using examedu.DTO.StudentDTO;
 using examedu.Services;
 using ExamEdu.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace examedu.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class StudentController : ControllerBase
     {

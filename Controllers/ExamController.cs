@@ -10,11 +10,13 @@ using ExamEdu.DTO;
 using ExamEdu.DTO.ExamDTO;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamEdu.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class ExamController : ControllerBase
     {

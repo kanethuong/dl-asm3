@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace examedu.DTO.AccountDTO
+namespace BackEnd.DTO.AuthDTO
 {
-    public class AccountResponse
+    public class AuthResponse
     {
-        public int ID { get; set; }
+        public int AccountId { get; set; }
         public string Fullname { get; set; }
-        public string Role { get; set; }
         public string Email { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public string Role { get; set; }
+        public string AccessToken { get; set; }
     }
 }

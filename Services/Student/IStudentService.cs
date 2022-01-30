@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using examedu.DTO.StudentDTO;
+using ExamEdu.DB.Models;
 
 namespace examedu.Services
 {
@@ -10,5 +11,6 @@ namespace examedu.Services
     {
         Task<List<ModuleMarkDTO>> getModuleMark(int studentID, int moduleID);
         bool CheckStudentExist(int id);
+        Task<Student> GetStudentByEmail(string email);
     }
 }

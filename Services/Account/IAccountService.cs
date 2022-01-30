@@ -12,6 +12,7 @@ namespace examedu.Services.Account
         Tuple<int, IEnumerable<AccountResponse>> GetAccountList(PaginationParameter paginationParameter);
         Tuple<int, IEnumerable<AccountResponse>> GetDeactivatedAccountList(PaginationParameter paginationParameter);
         Task<int> InsertNewAccount(AccountInput accountInput);
-       Task<int> DeactivateAccount(int id, int roleID);
+        Task<int> DeactivateAccount(int id, int roleID);
+        Task<Tuple<AccountResponse, string>> GetAccountByEmail(string email);
     }
 }

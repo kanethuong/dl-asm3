@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper;
+using BackEnd.DTO.Email;
+using BackEnd.Helper.Email;
 using examedu.DTO.AccountDTO;
 using ExamEdu.DB;
 using ExamEdu.DB.Models;
@@ -18,11 +20,13 @@ namespace examedu.Services.Account
     {
         private readonly DataContext _dataContext;
         private readonly IMapper _mapper;
+        private readonly IEmailHelper _emailHelper;
 
-        public AccountService(DataContext dataContext, IMapper mapper)
+        public AccountService(DataContext dataContext, IMapper mapper, IEmailHelper emailHelper)
         {
             _dataContext = dataContext;
             _mapper = mapper;
+            _emailHelper = emailHelper;
         }
 
         private string ConvertToUnsign(string str)
@@ -116,21 +120,21 @@ namespace examedu.Services.Account
                 paginationParameter.PageSize, paginationParameter.PageNumber));
         }
 
-        // private void sendEmail(string email, string password)
-        // {
-        //     EmailContent emailContent = new EmailContent();
-        //     emailContent.IsBodyHtml = true;
-        //     emailContent.ToEmail = email;
-        //     emailContent.Subject = "[EXAMEDU] Your password";
-        //     emailContent.Body = password;
-        //     _emailService.SendEmailAsync(emailContent);
-        // }
+        private void sendEmail(string email, string password)
+        {
+            EmailContent emailContent = new EmailContent();
+            emailContent.IsBodyHtml = true;
+            emailContent.ToEmail = email;
+            emailContent.Subject = "[ExamEdu] Your Password";
+            emailContent.Body = password;
+            _emailHelper.SendEmailAsync(emailContent);
+        }
 
         private string processPasswordAndSendEmail(string email)
         {
             string password = AutoGeneratorPassword.passwordGenerator(15, 5, 5, 5);
 
-            //sendEmail(email, password);
+            sendEmail(email, password);
             password = BCrypt.Net.BCrypt.HashPassword(password);
 
             return password;
@@ -249,6 +253,65 @@ namespace examedu.Services.Account
                 default:
                     return 0;
             }
+        }
+
+        /// <summary>
+        /// Get account and password in 4 roles by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<Tuple<AccountResponse, string>> GetAccountByEmail(string email)
+        {
+            string password = "";
+            AccountResponse accountToReponse;
+
+            async Task<string> getRoleName(int id)
+            {
+                Role role = await _dataContext.Roles.FindAsync(id);
+                return role.RoleName;
+            }
+
+            Administrator administrator = await _dataContext.Administrators.Where(s => s.Email.ToLower().Equals(email.ToLower())).FirstOrDefaultAsync(); ;
+            if (administrator != null)
+            {
+                accountToReponse = _mapper.Map<AccountResponse>(administrator);
+                accountToReponse.Role = await getRoleName(administrator.RoleId);
+                accountToReponse.ID = administrator.AdministratorId;
+                password = administrator.Password;
+                return Tuple.Create(accountToReponse, password);
+            }
+
+            Student student = await _dataContext.Students.Where(s => s.Email.ToLower().Equals(email.ToLower()) && s.DeactivatedAt == null).FirstOrDefaultAsync();
+            if (student != null)
+            {
+                accountToReponse = _mapper.Map<AccountResponse>(student);
+                accountToReponse.Role = await getRoleName(student.RoleId);
+                accountToReponse.ID = student.StudentId;
+                password = student.Password;
+                return Tuple.Create(accountToReponse, password);
+            }
+
+            Teacher teacher = await _dataContext.Teachers.Where(s => s.Email.ToLower().Equals(email.ToLower()) && s.DeactivatedAt == null).FirstOrDefaultAsync();
+            if (teacher != null)
+            {
+                accountToReponse = _mapper.Map<AccountResponse>(teacher);
+                accountToReponse.Role = await getRoleName(teacher.RoleId);
+                accountToReponse.ID = teacher.TeacherId;
+                password = teacher.Password;
+                return Tuple.Create(accountToReponse, password);
+            }
+
+            AcademicDepartment academicDepartment = await _dataContext.AcademicDepartments.Where(s => s.Email.ToLower().Equals(email.ToLower()) && s.DeactivatedAt == null).FirstOrDefaultAsync();
+            if (academicDepartment != null)
+            {
+                accountToReponse = _mapper.Map<AccountResponse>(academicDepartment);
+                accountToReponse.Role = await getRoleName(academicDepartment.RoleId);
+                accountToReponse.ID = academicDepartment.AcademicDepartmentId;
+                password = academicDepartment.Password;
+                return Tuple.Create(accountToReponse, password);
+            }
+
+            return null;
         }
     }
 }

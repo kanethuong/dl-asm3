@@ -2,13 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
+using Backend.Helper.Authentication;
+using BackEnd.DTO.Email;
+using BackEnd.Helper.Authentication;
+using BackEnd.Helper.Email;
+using BackEnd.Helper.RefreshToken;
+using BackEnd.Services;
 using examedu.Services;
 using examedu.Services.Account;
 using examedu.Services.Question;
 using ExamEdu.DB;
 using ExamEdu.DTO;
 using ExamEdu.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -20,6 +28,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -28,9 +37,11 @@ namespace ExamEdu
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _env;
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
         public IConfiguration Configuration { get; }
@@ -42,14 +53,40 @@ namespace ExamEdu
             string connectionString = Configuration.GetConnectionString("Postgre");
             services.AddDbContext<DataContext>(opt => opt.UseNpgsql(connectionString));
             services.AddScoped<DataContext, DataContext>();
-            
+
             // Setting JSON convert to camelCase in Object properties
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
-            
+
+            // Add Email service
+            var emailConfig = Configuration.GetSection("Email").Get<EmailConfig>();
+            services.AddScoped<IEmailHelper>(sp => new EmailHelper(emailConfig, _env));
+
+            // Add validate JWT token middleware
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.Zero, // Disable default 5 mins of Microsoft
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["Jwt:Key"]))
+                };
+            });
+
+            // Add IJwtGenerator to use in all project
+            services.AddSingleton<IJwtGenerator>(new JwtGenerator(Configuration["Jwt:Key"]));
+
+            // Add refresh token service
+            services.AddSingleton<IRefreshToken, RefreshToken>();
+
             // Map data from Model to DTO and back
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IAccountService, AccountService>();
@@ -58,6 +95,7 @@ namespace ExamEdu
             services.AddScoped<IModuleService, ModuleService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<ILevelService, LevelService>();
+            services.AddScoped<ITeacherService, TeacherService>();
 
             services.AddControllers().AddJsonOptions(options =>
             {
@@ -76,21 +114,42 @@ namespace ExamEdu
                                 )
                     });
             });
-;
+            ;
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ExamEdu", Version = "v1" });
+
+                var jwtSecurityScheme = new OpenApiSecurityScheme
+                {
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Name = "JWT Authentication",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Description = "Put **_ONLY_** your JWT Bearer token (Access Token) on textbox below!",
+
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+                c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { jwtSecurityScheme, Array.Empty<string>() }
+                });
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-        //     if (env.IsDevelopment())
-        //     {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ExamEdu v1"));
+            //     if (env.IsDevelopment())
+            //     {
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ExamEdu v1"));
             // }
 
             // ReFormat exception message
@@ -131,6 +190,8 @@ namespace ExamEdu
                 }
             });
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
