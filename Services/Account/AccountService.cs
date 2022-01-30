@@ -265,18 +265,18 @@ namespace examedu.Services.Account
             string password = "";
             AccountResponse accountToReponse;
 
-            async Task<string> getRoleName(int id)
-            {
-                Role role = await _dataContext.Roles.FindAsync(id);
-                return role.RoleName;
-            }
+            // async Task<string> getRoleName(int id)
+            // {
+            //     Role role = await _dataContext.Roles.FindAsync(id);
+            //     return role.RoleName;
+            // }
 
             Administrator administrator = await _dataContext.Administrators.Where(s => s.Email.ToLower().Equals(email.ToLower())).FirstOrDefaultAsync(); ;
             if (administrator != null)
             {
                 accountToReponse = _mapper.Map<AccountResponse>(administrator);
-                accountToReponse.Role = await getRoleName(administrator.RoleId);
-                accountToReponse.ID = administrator.AdministratorId;
+                // accountToReponse.Role = await getRoleName(administrator.RoleId);
+                // accountToReponse.ID = administrator.AdministratorId;
                 password = administrator.Password;
                 return Tuple.Create(accountToReponse, password);
             }
@@ -285,8 +285,8 @@ namespace examedu.Services.Account
             if (student != null)
             {
                 accountToReponse = _mapper.Map<AccountResponse>(student);
-                accountToReponse.Role = await getRoleName(student.RoleId);
-                accountToReponse.ID = student.StudentId;
+                // accountToReponse.Role = await getRoleName(student.RoleId);
+                // accountToReponse.ID = student.StudentId;
                 password = student.Password;
                 return Tuple.Create(accountToReponse, password);
             }
@@ -295,8 +295,8 @@ namespace examedu.Services.Account
             if (teacher != null)
             {
                 accountToReponse = _mapper.Map<AccountResponse>(teacher);
-                accountToReponse.Role = await getRoleName(teacher.RoleId);
-                accountToReponse.ID = teacher.TeacherId;
+                // accountToReponse.Role = await getRoleName(teacher.RoleId);
+                // accountToReponse.ID = teacher.TeacherId;
                 password = teacher.Password;
                 return Tuple.Create(accountToReponse, password);
             }
@@ -305,13 +305,19 @@ namespace examedu.Services.Account
             if (academicDepartment != null)
             {
                 accountToReponse = _mapper.Map<AccountResponse>(academicDepartment);
-                accountToReponse.Role = await getRoleName(academicDepartment.RoleId);
-                accountToReponse.ID = academicDepartment.AcademicDepartmentId;
+                // accountToReponse.Role = await getRoleName(academicDepartment.RoleId);
+                // accountToReponse.ID = academicDepartment.AcademicDepartmentId;
                 password = academicDepartment.Password;
                 return Tuple.Create(accountToReponse, password);
             }
 
             return null;
+        }
+
+        public async Task<string> GetRoleName(int id)
+        {
+            Role role = await _dataContext.Roles.FindAsync(id);
+            return role.RoleName;
         }
     }
 }

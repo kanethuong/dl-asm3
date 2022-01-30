@@ -56,10 +56,11 @@ namespace BackEnd.Controllers
                 }
 
                 //Create claims including email and role for adding to payload in access token
+                string roleName = await _accountService.GetRoleName(account.RoleID);
                 var claims = new List<Claim>{
-                    new Claim(ClaimTypes.Email,account.Email),
-                    new Claim("role",account.Role)
+                    new Claim(ClaimTypes.Email,account.Email)
                 };
+                claims.Add(new Claim("role", roleName));
 
                 //Generate access and refresh token
                 string accessToken = _jwtGenerator.GenerateAccessToken(claims);
@@ -74,6 +75,7 @@ namespace BackEnd.Controllers
 
                 //Add access token to account response
                 var authResponse = _mapper.Map<AuthResponse>(account);
+                authResponse.Role = roleName;
                 authResponse.AccessToken = accessToken;
                 return Ok(authResponse);
             }
@@ -92,9 +94,9 @@ namespace BackEnd.Controllers
         {
             if (!Request.Cookies.TryGetValue("X-Refresh-Token", out var refreshToken))
             {
-                return BadRequest(new ResponseDTO(400,"No cookies found!"));
+                return BadRequest(new ResponseDTO(400, "No cookies found!"));
             }
-            var tokenEmail=_refreshToken.GetEmailByRefreshToken(refreshToken);
+            var tokenEmail = _refreshToken.GetEmailByRefreshToken(refreshToken);
             try
             {
                 _refreshToken.RemoveRefreshTokenByEmail(tokenEmail);
