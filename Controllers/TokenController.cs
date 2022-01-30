@@ -56,7 +56,8 @@ namespace BackEnd.Controllers
 
                 //Check whether email with that role exist in db
                 var account = await _accountService.GetAccountByEmail(email);
-                if (account == null || !account.Item1.Role.Equals(role, StringComparison.CurrentCultureIgnoreCase))
+                string roleName=await _accountService.GetRoleName(account.Item1.RoleID);
+                if (account == null || !roleName.Equals(role, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return BadRequest(new ResponseDTO(400, "Invalid access token"));
                 }

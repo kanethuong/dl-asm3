@@ -14,5 +14,6 @@ namespace examedu.Services.Account
         Task<int> InsertNewAccount(AccountInput accountInput);
         Task<int> DeactivateAccount(int id, int roleID);
         Task<Tuple<AccountResponse, string>> GetAccountByEmail(string email);
+        Task<string> GetRoleName(int id);
     }
 }

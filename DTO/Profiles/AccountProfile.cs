@@ -12,15 +12,10 @@ namespace examedu.DTO.Profiles
     {
         public AccountProfile()
         {
-            CreateMap<Student, AccountResponse>().ForMember(ac => ac.Role, act => act.Ignore())
-                        .ForMember(ac => ac.Role, s => s.MapFrom(st => st.Role.RoleName))
-                        .ForMember(ac => ac.ID, s => s.MapFrom(st => st.StudentId));
-            CreateMap<AcademicDepartment, AccountResponse>().ForMember(ac => ac.Role, act => act.Ignore())
-                        .ForMember(ac => ac.Role, s => s.MapFrom(st => st.Role.RoleName))
-                        .ForMember(ac => ac.ID, s => s.MapFrom(st => st.AcademicDepartmentId));
-            CreateMap<Teacher, AccountResponse>().ForMember(ac => ac.Role, act => act.Ignore())
-                        .ForMember(ac => ac.Role, s => s.MapFrom(st => st.Role.RoleName))
-                        .ForMember(ac => ac.ID, s => s.MapFrom(st => st.TeacherId));
+            CreateMap<Student, AccountResponse>().ForMember(ac => ac.ID, s => s.MapFrom(st => st.StudentId));
+            CreateMap<AcademicDepartment, AccountResponse>().ForMember(ac => ac.ID, s => s.MapFrom(st => st.AcademicDepartmentId));
+            CreateMap<Teacher, AccountResponse>().ForMember(ac => ac.ID, s => s.MapFrom(st => st.TeacherId));
+            CreateMap<Administrator, AccountResponse>().ForMember(ac => ac.ID, s => s.MapFrom(ad=>ad.AdministratorId));
 
             CreateMap<AccountInput, Student>();
             CreateMap<AccountInput, Teacher>();
