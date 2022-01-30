@@ -37,6 +37,12 @@ namespace examedu.Services.Account
                         .Replace('\u0111', 'd').Replace('\u0110', 'D');
         }
 
+            string getRoleName(int id)
+            {
+                Role role =  _dataContext.Roles.Find(id);
+                return role.RoleName;
+            }
+
         private IEnumerable<AccountResponse> addAccountToTotalList(
         IEnumerable<Student> students, IEnumerable<AcademicDepartment> AcademicDepartments, IEnumerable<Teacher> teachers)
         {
@@ -45,18 +51,21 @@ namespace examedu.Services.Account
             foreach (var item in students)
             {
                 var itemToResponse = _mapper.Map<AccountResponse>(item);
+                itemToResponse.RoleName = getRoleName(item.RoleId);
                 totalAccount.Add(itemToResponse);
             }
 
             foreach (var item in AcademicDepartments)
             {
                 var itemToResponse = _mapper.Map<AccountResponse>(item);
+                itemToResponse.RoleName = getRoleName(item.RoleId);
                 totalAccount.Add(itemToResponse);
             }
 
             foreach (var item in teachers)
             {
                 var itemToResponse = _mapper.Map<AccountResponse>(item);
+                itemToResponse.RoleName = getRoleName(item.RoleId);
                 totalAccount.Add(itemToResponse);
             }
 
