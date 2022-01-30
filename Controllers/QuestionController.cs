@@ -6,11 +6,13 @@ using examedu.DTO.QuestionDTO;
 using examedu.Services;
 using ExamEdu.DTO;
 using ExamEdu.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace examedu.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class QuestionController : ControllerBase
     {

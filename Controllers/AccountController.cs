@@ -7,10 +7,12 @@ using examedu.DTO.AccountDTO;
 using examedu.Services.Account;
 using ExamEdu.DTO;
 using ExamEdu.DTO.PaginationDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace examedu.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
