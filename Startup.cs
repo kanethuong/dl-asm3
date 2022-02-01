@@ -96,6 +96,7 @@ namespace ExamEdu
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<ILevelService, LevelService>();
             services.AddScoped<ITeacherService, TeacherService>();
+            services.AddScoped<IMarkService, MarkService>();
 
             services.AddControllers().AddJsonOptions(options =>
             {
