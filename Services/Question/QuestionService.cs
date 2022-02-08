@@ -38,7 +38,12 @@ namespace examedu.Services.Question
                 {
                     //return await _db.Answers.Where(a => a.QuestionId == questionID).ToListAsync();
                     QuestionResponse questionResponse = _mapper.Map<QuestionResponse>(question);
-                    questionResponse.Answers = await _dataContext.Answers.Where(a => a.QuestionId == question.FEQuestionId).ToListAsync();
+                    questionResponse.Answers = new List<AnswerResponse>();
+                    var Answers = await _dataContext.FEAnswers.Where(a => a.FEQuestionId == question.FEQuestionId).ToListAsync();
+                    foreach (var answer in Answers)
+                    {
+                        questionResponse.Answers.Add(_mapper.Map<AnswerResponse>(answer));
+                    }
                     listResponse.Add(questionResponse);
                 }
             }
@@ -49,7 +54,11 @@ namespace examedu.Services.Question
                 foreach (var question in QuestionListFromDB)
                 {
                     QuestionResponse questionResponse = _mapper.Map<QuestionResponse>(question);
-                    questionResponse.Answers = await _dataContext.Answers.Where(a => a.QuestionId == question.QuestionId).ToListAsync();
+                    var Answers = await _dataContext.Answers.Where(a => a.QuestionId == question.QuestionId).ToListAsync();
+                    foreach (var answer in Answers)
+                    {
+                        questionResponse.Answers.Add(_mapper.Map<AnswerResponse>(answer));
+                    }
                     listResponse.Add(questionResponse);
                 }
             }
