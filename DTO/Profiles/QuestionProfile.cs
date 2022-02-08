@@ -14,6 +14,8 @@ namespace examedu.DTO.Profiles
         {
             CreateMap<Question, QuestionResponse>();
             CreateMap<FEQuestion, QuestionResponse>().ForMember(q => q.QuestionId, s => s.MapFrom(s => s.FEQuestionId));
+            CreateMap<Answer, AnswerResponse>();
+            CreateMap<FEAnswer, AnswerResponse>();
         }
     }
 }
