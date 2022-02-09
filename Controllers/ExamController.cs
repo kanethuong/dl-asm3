@@ -89,5 +89,16 @@ namespace ExamEdu.Controllers
             }
             return BadRequest(new ResponseDTO(400, "Error when create exam paper"));
         }
+
+        [HttpGet("examInfor/{id:int}")]
+        public async Task<ActionResult<ExamResponse>> GetExamById(int id)
+        {
+            var exam = await _examService.getExamById(id);
+            if(exam == null)
+            {
+                return NotFound(new ResponseDTO(404, "Exam not found"));
+            }
+            return Ok(_mapper.Map<ExamResponse>(exam));
+        }
     }
 }
