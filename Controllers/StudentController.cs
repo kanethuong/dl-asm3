@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace examedu.Controllers
 {
+    [ApiController]
     [Authorize]
     [Route("api/[controller]")]
     public class StudentController : ControllerBase
@@ -28,7 +29,7 @@ namespace examedu.Controllers
         /// <param name="moduleId"></param>
         /// <returns>400 student or moduleID not exist / 404 Student dont have exam</returns>
         [HttpGet("markReport/{studentID:int}/{moduleID:int}")]
-        public async Task<ActionResult<List<ModuleMarkDTO>>> DeactivateAccount(int studentId, int moduleId)
+        public async Task<ActionResult<List<ModuleMarkDTO>>> MarkReport(int studentId, int moduleId)
         {
             List<ModuleMarkDTO> listResult = await _studentService.getModuleMark(studentId, moduleId);
             if(listResult == null)

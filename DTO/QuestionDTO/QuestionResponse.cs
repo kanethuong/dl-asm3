@@ -14,6 +14,6 @@ namespace examedu.DTO.QuestionDTO
         public DateTime ApprovedAt { get; set; }
         public int QuestionTypeID { get; set; }
 
-        public List<Answer> Answers { get; set; }
+        public List<AnswerResponse> Answers { get; set; }
     }
 }
