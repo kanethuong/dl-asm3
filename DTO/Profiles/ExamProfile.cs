@@ -16,6 +16,7 @@ namespace ExamEdu.DTO.Profiles
             CreateMap<Exam, ExamScheduleResponse>();
             CreateMap<CreateExamByHandInput, Exam_FEQuestion>();
             CreateMap<CreateExamByHandInput, ExamQuestion>();
+            CreateMap<Exam,ExamResponse>();
         }
         
     }
