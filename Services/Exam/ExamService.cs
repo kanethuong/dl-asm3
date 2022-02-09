@@ -31,7 +31,7 @@ namespace ExamEdu.Services
             var allExamOfStudent = await _db.StudentExamInfos.Where(e => e.StudentId == studentId).Select(e => e.ExamId).ToListAsync();
             if (allExamOfStudent.Count() == 0)
             {
-                return null;
+                return new Tuple<int, IEnumerable<Exam>>(0,null);
             }
             List<Exam> examList = new List<Exam>();
             foreach (var examId in allExamOfStudent)
