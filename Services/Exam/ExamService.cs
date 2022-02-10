@@ -31,7 +31,7 @@ namespace ExamEdu.Services
             var allExamOfStudent = await _db.StudentExamInfos.Where(e => e.StudentId == studentId).Select(e => e.ExamId).ToListAsync();
             if (allExamOfStudent.Count() == 0)
             {
-                return new Tuple<int, IEnumerable<Exam>>(0,null);
+                return new Tuple<int, IEnumerable<Exam>>(0, null);
             }
             List<Exam> examList = new List<Exam>();
             foreach (var examId in allExamOfStudent)
@@ -283,5 +283,14 @@ namespace ExamEdu.Services
             return 1;
         }
 
+        /// <summary>
+        /// Check if an exam is a final exam
+        /// </summary>
+        /// <param name="examId"></param>
+        /// <returns></returns>
+        public bool IsFinalExam(int examId)
+        {
+            return _db.Exams.Where(e => e.ExamId == examId).Select(e => e.isFinalExam).FirstOrDefault();
+        }
     }
 }
