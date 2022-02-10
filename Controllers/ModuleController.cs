@@ -19,24 +19,25 @@ namespace ExamEdu.Controllers
     [Route("api/[controller]")]
     public class ModuleController : ControllerBase
     {
-         private readonly IModuleService _moduleService;
+        private readonly IModuleService _moduleService;
         private readonly IStudentService _studentService;
-        private readonly IMapper _mapper;        
-        public ModuleController(IModuleService moduleService,IMapper mapper,IStudentService studentService)
+        private readonly IMapper _mapper;
+        public ModuleController(IModuleService moduleService, IMapper mapper, IStudentService studentService)
         {
             _moduleService = moduleService;
             _mapper = mapper;
             _studentService = studentService;
         }
         [HttpGet("{studentId:int}")]
-        public async Task<IActionResult> ViewModuleStudentHaveExam(int studentId,[FromQuery]PaginationParameter paginationParameter)
+        public async Task<IActionResult> ViewModuleStudentHaveExam(int studentId, [FromQuery] PaginationParameter paginationParameter)
         {
             bool isStudentExist = _studentService.CheckStudentExist(studentId);
-            if(isStudentExist==false){
+            if (isStudentExist == false)
+            {
                 return NotFound(new ResponseDTO(404, "Student not found"));
             }
-            (int totalRecord, IEnumerable<Module> modules)  =
-                            await _moduleService.getAllModuleStudentHaveExam(studentId,paginationParameter);
+            (int totalRecord, IEnumerable<Module> modules) =
+                            await _moduleService.getAllModuleStudentHaveExam(studentId, paginationParameter);
             if (totalRecord == 0)
             {
                 return NotFound(new ResponseDTO(404, "Student doesn't have exam on any module"));
@@ -45,6 +46,18 @@ namespace ExamEdu.Controllers
 
             return Ok(new PaginationResponse<IEnumerable<ModuleResponse>>(totalRecord, modulesResponses));
         }
-        
+
+        [HttpGet]
+        public async Task<IActionResult> ViewAllModule([FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<Module> modules) = await _moduleService.getModules(paginationParameter);
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "No module found"));
+            }
+            IEnumerable<ModuleInformationResponse> moduleInformationResponses = _mapper.Map<IEnumerable<ModuleInformationResponse>>(modules);
+            return Ok(new PaginationResponse<IEnumerable<ModuleInformationResponse>>(totalRecord, moduleInformationResponses));
+        }
+
     }
 }

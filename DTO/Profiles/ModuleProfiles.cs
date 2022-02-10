@@ -13,7 +13,7 @@ namespace ExamEdu.DTO.Profiles
         public ModuleProfiles()
         {
             CreateMap<Module, ModuleResponse>();
-
+            CreateMap<Module, ModuleInformationResponse>();
         }
     }
 }
