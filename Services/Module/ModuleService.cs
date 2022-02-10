@@ -9,16 +9,21 @@ using ExamEdu.DB.Models;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Helper;
 using Microsoft.EntityFrameworkCore;
+using ExamEdu.DTO.ModuleDTO;
+using AutoMapper;
 
 namespace ExamEdu.Services
 {
     public class ModuleService : IModuleService
     {
         private readonly DataContext _db;
-        public ModuleService(DataContext db)
+        private readonly IMapper _mapper;
+        public ModuleService(DataContext db, IMapper mapper)
         {
+            _mapper = mapper;
             _db = db;
         }
+
         public async Task<Tuple<int, IEnumerable<Module>>> getAllModuleStudentHaveExam(int studentId, PaginationParameter paginationParameter)
         {
             //Select all the exam student have attend
@@ -48,12 +53,21 @@ namespace ExamEdu.Services
 
         }
 
+        public async Task<Module> getModuleByCode(string code)
+        {
+            return await _db.Modules.Where(m => m.ModuleCode.ToUpper() == code.ToUpper()).FirstOrDefaultAsync();
+        }
+
         public async Task<Module> getModuleByID(int id)
         {
             return await _db.Modules.Where(m => m.ModuleId == id).FirstOrDefaultAsync();
         }
 
-
+        /// <summary>
+        /// Get modules by pagination
+        /// </summary>
+        /// <param name="paginationParameter">Parameter for pagination</param>
+        /// <returns>A tuple containing the total amount of records and a list of paginated modules</returns>
         public async Task<Tuple<int, IEnumerable<Module>>> getModules(PaginationParameter paginationParameter)
         {
             string searchName = paginationParameter.SearchName;
@@ -62,6 +76,48 @@ namespace ExamEdu.Services
 
             var moduleList = await _db.Modules.Where(m => m.ModuleName.ToUpper().Contains(searchName.ToUpper()) || m.ModuleCode.ToUpper().Contains(searchName.ToUpper())).ToListAsync();
             return Tuple.Create(moduleList.Count, moduleList.GetPage(paginationParameter));
+        }
+
+        /// <summary>
+        /// Insert a new module into the database
+        /// </summary>
+        /// <param name="moduleInput">Detail of the module: moduleCode, moduleName</param>
+        /// <returns>An integer indicating if the insertion was successful. 1: success / 0: fail</returns>
+        public async Task<int> InsertNewModule(ModuleInput moduleInput)
+        {
+            int result = 0;
+            var newModule = _mapper.Map<Module>(moduleInput);   //Map DTO to Model
+            newModule.CreatedAt = DateTime.Now;
+
+            _db.Modules.Add(newModule);
+            result = await _db.SaveChangesAsync();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Update an existing module with new information
+        /// </summary>
+        /// <param name="moduleInput">Detail of the module: moduleCode, moduleName</param>
+        /// <returns>An integer indicating if the update action waas successful. 1: sucess / 0: fail</returns>
+        public async Task<int> UpdateModule(ModuleInput moduleInput)
+        {
+            var module = await getModuleByCode(moduleInput.ModuleCode);
+
+            module.ModuleName = moduleInput.ModuleName;
+
+            return await _db.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Delete a module by id
+        /// </summary>
+        /// <param name="id">The id of the module</param>
+        /// <returns>An integer indicating if the delete action was sucessful. 1: success / 0: fail</returns>
+        public async Task<int> DeleteModule(int id)
+        {
+            _db.Modules.Remove(await getModuleByID(id));
+            return await _db.SaveChangesAsync();
         }
 
         private string ConvertToUnsign(string str)
