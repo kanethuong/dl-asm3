@@ -14,5 +14,6 @@ namespace ExamEdu.Services
         Task<int> CreateExamPaperByHand(CreateExamByHandInput input);
         Task<int> CreateExamPaperAuto(CreateExamAutoInput input);
         Task<Exam> getExamById(int id);
+        bool IsFinalExam(int examId);
     }
 }
