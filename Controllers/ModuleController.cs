@@ -47,6 +47,12 @@ namespace ExamEdu.Controllers
             return Ok(new PaginationResponse<IEnumerable<ModuleResponse>>(totalRecord, modulesResponses));
         }
 
+
+        /// <summary>
+        /// Get all module in the db with pagination config
+        /// </summary>
+        /// <param name="paginationParameter">Pagination parameters</param>
+        /// <returns>200: List of Module with pagination / 404: No Module found</returns>
         [HttpGet]
         public async Task<IActionResult> ViewAllModule([FromQuery] PaginationParameter paginationParameter)
         {
@@ -59,5 +65,82 @@ namespace ExamEdu.Controllers
             return Ok(new PaginationResponse<IEnumerable<ModuleInformationResponse>>(totalRecord, moduleInformationResponses));
         }
 
+        /// <summary>
+        /// Create a new module from module Input
+        /// </summary>
+        /// <param name="moduleInput">Detail of module composing of: moduleCode, moduleName</param>
+        /// <returns>201: Module Created / 400: Something went wrong / 409: Module already exists</returns>
+        [HttpPost]
+        public async Task<IActionResult> CreateModule([FromBody] ModuleInput moduleInput)
+        {
+            //Check if module name is exist
+            bool isModuleExist = await _moduleService.getModuleByCode(moduleInput.ModuleName) != null;
+
+            if (isModuleExist)
+            {
+                return BadRequest(new ResponseDTO(409, "Module already exists"));
+            }
+
+            int result = await _moduleService.InsertNewModule(moduleInput);
+
+            if (result != 1)
+            {
+                return BadRequest(new ResponseDTO(400, "Something went wrong"));
+            }
+
+            return CreatedAtAction(nameof(ViewAllModule), new ResponseDTO(201, "Module created"));
+
+        }
+
+        /// <summary>
+        /// Update a module with information from moduleInput
+        /// </summary>
+        /// <param name="moduleInput">Detail of module composing of: moduleCode, moduleName</param>
+        /// <returns>200: Module updated / 400: Something went wrong / 404: Module not found</returns>
+        [HttpPut]
+        public async Task<IActionResult> UpdateModule([FromBody] ModuleInput moduleInput)
+        {
+            //Check if module exist
+            bool isModuleExist = await _moduleService.getModuleByCode(moduleInput.ModuleCode) != null;
+
+            if (!isModuleExist)
+            {
+                return BadRequest(new ResponseDTO(404, "Module not found"));
+            }
+
+            int result = await _moduleService.UpdateModule(moduleInput);
+            if (result != 1)
+            {
+                return BadRequest(new ResponseDTO(400, "Something went wrong"));
+            }
+
+            return Ok(new ResponseDTO(200, "Module updated"));
+        }
+
+        /// <summary>
+        /// Delete a module by id
+        /// </summary>
+        /// <param name="id">The id of the module</param>
+        /// <returns>200: Module deleted / 400: Something went wrong / 404: Module not found</returns>
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteModule(int id)
+        {
+            //Check if module exist
+            bool isModuleExist = await _moduleService.getModuleByID(id) != null;
+
+            if (!isModuleExist)
+            {
+                return BadRequest(new ResponseDTO(404, "Module not found"));
+            }
+
+            int result = await _moduleService.DeleteModule(id);
+
+            if (result != 1)
+            {
+                return BadRequest(new ResponseDTO(400, "Something went wrong"));
+            }
+
+            return Ok(new ResponseDTO(200, "Module deleted"));
+        }
     }
 }
