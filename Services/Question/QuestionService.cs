@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using BackEnd.DTO.ExamQuestionsDTO;
 using examedu.DTO.QuestionDTO;
 using ExamEdu.DB;
+using ExamEdu.DB.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace examedu.Services.Question
+namespace examedu.Services
 {
     public class QuestionService : IQuestionService
     {
@@ -63,6 +65,46 @@ namespace examedu.Services.Question
                 }
             }
             return listResponse;
+        }
+
+        /// <summary>
+        /// Get a list of questions and answers by a list of question id
+        /// </summary>
+        /// <param name="questionIdList"></param>
+        /// <param name="isFinalExam"></param>
+        /// <returns></returns>
+        public async Task<List<ExamQuestionsResponse>> GetListExamQuestionsByListQuestionId(List<int> questionIdList, bool isFinalExam)
+        {
+            List<ExamQuestionsResponse> examQuestResponseList = new List<ExamQuestionsResponse>();
+            if (isFinalExam)
+            {
+                foreach (var questionId in questionIdList)
+                {
+                    FEQuestion question = await _dataContext.FEQuestions.Where(q => q.FEQuestionId == questionId && q.ApproveAt != null).FirstOrDefaultAsync();
+                    var examQuestResponse = _mapper.Map<ExamQuestionsResponse>(question);
+                    List<FEAnswer> answerList = await _dataContext.FEAnswers.Where(ans => ans.FEAnswerId == question.FEQuestionId).ToListAsync();
+                    foreach (var answer in answerList)
+                    {
+                        examQuestResponse.Answers.Add(_mapper.Map<AnswerContentResponse>(answer));
+                    }
+                    examQuestResponseList.Add(examQuestResponse);
+                }
+            }
+            else
+            {
+                foreach (int questionId in questionIdList)
+                {
+                    Question question = await _dataContext.Questions.Where(q => q.QuestionId == questionId && q.ApproveAt != null).FirstOrDefaultAsync();
+                    var examQuestResponse = _mapper.Map<ExamQuestionsResponse>(question);
+                    List<Answer> answerList = await _dataContext.Answers.Where(ans => ans.QuestionId == question.QuestionId).ToListAsync();
+                    foreach (var answer in answerList)
+                    {
+                        examQuestResponse.Answers.Add(_mapper.Map<AnswerContentResponse>(answer));
+                    }
+                    examQuestResponseList.Add(examQuestResponse);
+                }
+            }
+            return examQuestResponseList;
         }
     }
 }
