@@ -74,7 +74,7 @@ namespace ExamEdu.Controllers
         public async Task<IActionResult> CreateModule([FromBody] ModuleInput moduleInput)
         {
             //Check if module name is exist
-            bool isModuleExist = await _moduleService.getModuleByCode(moduleInput.ModuleName) != null;
+            bool isModuleExist = await _moduleService.getModuleByCode(moduleInput.ModuleCode) != null;
 
             if (isModuleExist)
             {

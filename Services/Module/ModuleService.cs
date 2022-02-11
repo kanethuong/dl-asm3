@@ -74,7 +74,7 @@ namespace ExamEdu.Services
             searchName = searchName.Replace(":*|", " ").Replace(":*", "");
             searchName = ConvertToUnsign(searchName);
 
-            var moduleList = await _db.Modules.Where(m => m.ModuleName.ToUpper().Contains(searchName.ToUpper()) || m.ModuleCode.ToUpper().Contains(searchName.ToUpper())).ToListAsync();
+            var moduleList = await _db.Modules.Where(m => m.ModuleName.ToUpper().Contains(searchName.ToUpper()) || m.ModuleCode.ToUpper().Contains(searchName.ToUpper())).OrderBy(m => m.ModuleId).ToListAsync();
             return Tuple.Create(moduleList.Count, moduleList.GetPage(paginationParameter));
         }
 
