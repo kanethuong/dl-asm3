@@ -74,7 +74,7 @@ namespace ExamEdu.Controllers
         [HttpPost("autoGenerate")]
         public async Task<IActionResult> CreateExamAuto(CreateExamAutoInput input)
         {
-            if(await _examService.getExamById(input.ExamId) is null)
+            if (await _examService.getExamById(input.ExamId) is null)
             {
                 return BadRequest(new ResponseDTO(400, "Exam not existed"));
             }
@@ -94,11 +94,24 @@ namespace ExamEdu.Controllers
         public async Task<ActionResult<ExamResponse>> GetExamById(int id)
         {
             var exam = await _examService.getExamById(id);
-            if(exam == null)
+            if (exam == null)
             {
                 return NotFound(new ResponseDTO(404, "Exam not found"));
             }
             return Ok(_mapper.Map<ExamResponse>(exam));
+        }
+
+        [HttpGet("progressExam/{classModuleId:int}")]
+        public async Task<IActionResult> GetProgressExam(int classModuleId, [FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<Exam> progressExams) = await _examService.GetExamsByClassModuleId(classModuleId, paginationParameter);
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "Exam not found"));
+            }
+            IEnumerable<ProgressExamResponse> progressExamResponses = _mapper.Map<IEnumerable<ProgressExamResponse>>(progressExams);
+
+            return Ok(new PaginationResponse<IEnumerable<ProgressExamResponse>>(totalRecord, progressExamResponses));
         }
     }
 }

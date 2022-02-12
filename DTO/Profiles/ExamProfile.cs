@@ -9,15 +9,16 @@ using ExamEdu.DTO.ExamDTO;
 
 namespace ExamEdu.DTO.Profiles
 {
-    public class ExamProfile:Profile
+    public class ExamProfile : Profile
     {
         public ExamProfile()
         {
             CreateMap<Exam, ExamScheduleResponse>();
             CreateMap<CreateExamByHandInput, Exam_FEQuestion>();
             CreateMap<CreateExamByHandInput, ExamQuestion>();
-            CreateMap<Exam,ExamResponse>();
+            CreateMap<Exam, ExamResponse>();
+            CreateMap<Exam, ProgressExamResponse>();
         }
-        
+
     }
 }
