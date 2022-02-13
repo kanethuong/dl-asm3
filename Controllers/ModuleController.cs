@@ -74,11 +74,11 @@ namespace ExamEdu.Controllers
         public async Task<IActionResult> CreateModule([FromBody] ModuleInput moduleInput)
         {
             //Check if module name is exist
-            bool isModuleExist = await _moduleService.getModuleByCode(moduleInput.ModuleName) != null;
+            bool isModuleExist = await _moduleService.getModuleByCode(moduleInput.ModuleCode) != null;
 
             if (isModuleExist)
             {
-                return BadRequest(new ResponseDTO(409, "Module already exists"));
+                return Conflict(new ResponseDTO(409, "Module already exists"));
             }
 
             int result = await _moduleService.InsertNewModule(moduleInput);

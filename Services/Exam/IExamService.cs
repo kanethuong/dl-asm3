@@ -15,5 +15,6 @@ namespace ExamEdu.Services
         Task<int> CreateExamPaperAuto(CreateExamAutoInput input);
         Task<Exam> getExamById(int id);
         bool IsFinalExam(int examId);
+        Task<Tuple<int, IEnumerable<Exam>>> GetExamsByClassModuleId(int classModuleId, PaginationParameter paginationParameter);
     }
 }

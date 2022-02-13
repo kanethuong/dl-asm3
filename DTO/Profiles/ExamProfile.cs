@@ -19,6 +19,8 @@ namespace ExamEdu.DTO.Profiles
             CreateMap<CreateExamByHandInput, ExamQuestion>();
             CreateMap<Exam, ExamResponse>();
             CreateMap<Exam, ExamQuestionsResponse>().ForMember(eqr=>eqr.ModuleName,s=>s.MapFrom(s=>s.Module.ModuleName));
+            CreateMap<Exam, ProgressExamResponse>();
         }
+
     }
 }
