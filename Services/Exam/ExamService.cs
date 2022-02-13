@@ -162,7 +162,26 @@ namespace ExamEdu.Services
 
         public async Task<Exam> getExamById(int id)
         {
-            return await _db.Exams.Where(e => e.ExamId == id).FirstOrDefaultAsync();
+            return await _db.Exams.Where(e => e.ExamId == id)
+                                .Select(e => new Exam
+                                {
+                                    ExamId = e.ExamId,
+                                    ExamName = e.ExamName,
+                                    Description = e.Description,
+                                    ExamDay = e.ExamDay,
+                                    DurationInMinute = e.DurationInMinute,
+                                    CreatedAt = e.CreatedAt,
+                                    isFinalExam = e.isFinalExam,
+                                    IsCancelled = e.IsCancelled,
+                                    ProctorId = e.ProctorId,
+                                    SupervisorId = e.SupervisorId,
+                                    ModuleId = e.ModuleId,
+                                    Module = new Module
+                                    {
+                                        ModuleName=e.Module.ModuleName
+                                    }
+                                })
+                                .FirstOrDefaultAsync();
         }
 
         public async Task<int> CreateExamPaperAuto(CreateExamAutoInput input)
