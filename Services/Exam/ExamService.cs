@@ -28,7 +28,7 @@ namespace ExamEdu.Services
         /// <returns></returns>
         public async Task<Tuple<int, IEnumerable<Exam>>> getExamByStudentId(int studentId, PaginationParameter paginationParameter)
         {
-            var allExamOfStudent = await _db.StudentExamInfos.Where(e => e.StudentId == studentId).Select(e => e.ExamId).ToListAsync();
+            var allExamOfStudent = await _db.StudentExamInfos.Where(e => e.StudentId == studentId && e.FinishAt==null).Select(e => e.ExamId).ToListAsync();
             if (allExamOfStudent.Count() == 0)
             {
                 return new Tuple<int, IEnumerable<Exam>>(0, null);
@@ -36,7 +36,19 @@ namespace ExamEdu.Services
             List<Exam> examList = new List<Exam>();
             foreach (var examId in allExamOfStudent)
             {
-                var exam = await _db.Exams.FirstOrDefaultAsync(e => e.ExamId == examId && e.ExamDay >= DateTime.Now);
+                var exam = await _db.Exams.Select(e => new Exam
+                                {
+                                    ExamId = e.ExamId,
+                                    ExamName = e.ExamName,
+                                    Description = e.Description,
+                                    ExamDay = e.ExamDay,
+                                    DurationInMinute = e.DurationInMinute,
+                                    ModuleId = e.ModuleId,
+                                    Module = new Module
+                                    {
+                                        ModuleCode=e.Module.ModuleCode
+                                    }
+                                }).FirstOrDefaultAsync(e => e.ExamId == examId);
                 if (exam is not null)
                 {
                     examList.Add(exam);
@@ -178,7 +190,7 @@ namespace ExamEdu.Services
                                     ModuleId = e.ModuleId,
                                     Module = new Module
                                     {
-                                        ModuleName=e.Module.ModuleName
+                                        ModuleCode=e.Module.ModuleCode
                                     }
                                 })
                                 .FirstOrDefaultAsync();
