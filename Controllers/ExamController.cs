@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using examedu.DTO.ExamDTO;
+using examedu.DTO.StudentDTO;
 using examedu.Services;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
@@ -113,5 +114,20 @@ namespace ExamEdu.Controllers
 
             return Ok(new PaginationResponse<IEnumerable<ProgressExamResponse>>(totalRecord, progressExamResponses));
         }
+
+        //get result of an exam
+        [HttpGet("result/{examId:int}")]
+        public async Task<IActionResult> GetResultExam(int examId, [FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<StudentMarkResponse> studentMarkResponse) = await _examService.GetResultExamByExamId(examId,paginationParameter);
+            
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "Student mark not found"));
+            }
+
+            return Ok(new PaginationResponse<IEnumerable<StudentMarkResponse>>(totalRecord, studentMarkResponse));
+        }
+
     }
 }
