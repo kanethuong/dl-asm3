@@ -26,14 +26,9 @@ namespace BackEnd.Services
             return await _dataContext.Teachers.Where(s => s.Email.ToLower().Equals(email.ToLower()) && s.DeactivatedAt == null).FirstOrDefaultAsync();
         }
 
-        /// <summary>
-        /// Check whether the teacher exist in db
-        /// </summary>
-        /// <param name="teacherId"></param>
-        /// <returns></returns>
-        public bool IsTeacherExist(int teacherId)
+        public async Task<bool> IsTeacherExist(int id)
         {
-            return _dataContext.Teachers.Any(t => t.TeacherId == teacherId && t.DeactivatedAt == null);
+            return await _dataContext.Teachers.Where(s => s.TeacherId == id && s.DeactivatedAt == null).AnyAsync();
         }
     }
 }

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using examedu.DTO.ExamDTO;
+using examedu.DTO.StudentDTO;
 using examedu.Helper.RandomGenerator;
 using ExamEdu.DB;
 using ExamEdu.DB.Models;
+using ExamEdu.DTO.ExamDTO;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Helper;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +30,7 @@ namespace ExamEdu.Services
         /// <returns></returns>
         public async Task<Tuple<int, IEnumerable<Exam>>> getExamByStudentId(int studentId, PaginationParameter paginationParameter)
         {
-            var allExamOfStudent = await _db.StudentExamInfos.Where(e => e.StudentId == studentId && e.FinishAt==null).Select(e => e.ExamId).ToListAsync();
+            var allExamOfStudent = await _db.StudentExamInfos.Where(e => e.StudentId == studentId && e.FinishAt == null).Select(e => e.ExamId).ToListAsync();
             if (allExamOfStudent.Count() == 0)
             {
                 return new Tuple<int, IEnumerable<Exam>>(0, null);
@@ -44,6 +46,7 @@ namespace ExamEdu.Services
                                     ExamDay = e.ExamDay,
                                     DurationInMinute = e.DurationInMinute,
                                     ModuleId = e.ModuleId,
+                                    Password=e.Password,
                                     Module = new Module
                                     {
                                         ModuleCode=e.Module.ModuleCode
@@ -74,6 +77,10 @@ namespace ExamEdu.Services
             foreach (var level in input.NumberOfMCQuestionByLevel)
             {
                 totalMCQuestion += level.Value;
+            }
+            if (totalMCQuestion == 0)
+            {
+                totalMCQuestion++;
             }
             decimal MCQMark = totalMCQMark / totalMCQuestion;
 
@@ -190,7 +197,7 @@ namespace ExamEdu.Services
                                     ModuleId = e.ModuleId,
                                     Module = new Module
                                     {
-                                        ModuleCode=e.Module.ModuleCode
+                                        ModuleCode = e.Module.ModuleCode
                                     }
                                 })
                                 .FirstOrDefaultAsync();
@@ -341,6 +348,44 @@ namespace ExamEdu.Services
             int totalRecord = exams.Count;
 
             return new Tuple<int, IEnumerable<Exam>>(totalRecord, exams.GetPage(paginationParameter));
+        }
+
+
+        /// <summary>
+        /// Insert information about an exam into the database
+        /// </summary>
+        /// <param name="exam">Information of the exam</param>
+        /// <returns>
+        /// A tuple of two values:
+        ///    - The first value is the number of rows affected
+        ///   - The second value is the examId of the exam inserted
+        /// </returns>
+        public async Task<Tuple<int, int>> CreateExamInfo(Exam exam)
+        {
+            //Insert exam to database
+            await _db.Exams.AddAsync(exam);
+            int result = await _db.SaveChangesAsync();
+            return new Tuple<int, int>(result, exam.ExamId);
+
+        }
+        public async Task<Tuple<int, IEnumerable<StudentMarkResponse>>> GetResultExamByExamId(int examId, PaginationParameter paginationParameter)
+        {
+            var studentExamInfor = await _db.StudentExamInfos.Join(_db.Exams, sei => sei.ExamId, e => e.ExamId, (sei, e) => new { sei, e })
+                                                            .Join(_db.Students, x => x.sei.StudentId, s => s.StudentId, (x, s) => new { x, s })
+                                                            .Where(y => y.x.sei.ExamId == examId)
+                                                            .Select(y => new StudentMarkResponse
+                                                            {
+                                                                ExamName = y.x.e.ExamName,
+                                                                ExamDay = y.x.e.ExamDay,
+                                                                StudentId = y.s.StudentId,
+                                                                StudentName = y.s.Fullname,
+                                                                FinishedAt = y.x.sei.FinishAt,
+                                                                Mark = y.x.sei.Mark,
+                                                                NeedToGradeTextQuestion = y.x.sei.NeedToGradeTextQuestion,
+                                                            }).ToListAsync();
+            int totalRecord = studentExamInfor.Count;
+
+            return new Tuple<int, IEnumerable<StudentMarkResponse>>(totalRecord, studentExamInfor.GetPage(paginationParameter));
         }
     }
 }

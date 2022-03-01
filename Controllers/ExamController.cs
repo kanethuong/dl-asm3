@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using BackEnd.Services;
 using examedu.DTO.ExamDTO;
+using examedu.DTO.StudentDTO;
 using examedu.Services;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
@@ -22,9 +24,17 @@ namespace ExamEdu.Controllers
     {
         private readonly IExamService _examService;
         private readonly IStudentService _studentService;
+        private readonly IModuleService _moduleService;
+        private readonly ITeacherService _teacherService;
         private readonly IMapper _mapper;
-        public ExamController(IExamService examService, IMapper mapper, IStudentService studentService)
+        public ExamController(IExamService examService,
+                                IMapper mapper,
+                                IStudentService studentService,
+                                IModuleService moduleService,
+                                ITeacherService teacherService)
         {
+            _teacherService = teacherService;
+            _moduleService = moduleService;
             _examService = examService;
             _mapper = mapper;
             _studentService = studentService;
@@ -113,5 +123,69 @@ namespace ExamEdu.Controllers
 
             return Ok(new PaginationResponse<IEnumerable<ProgressExamResponse>>(totalRecord, progressExamResponses));
         }
+
+        /// <summary>
+        /// Insert exam's information into the database
+        /// </summary>
+        /// <param name="input">Exam's information</param>
+        /// <returns>
+        /// 201: Successfully inserted, exam's id
+        /// 400: Error when insert
+        /// </returns>
+        [HttpPost("createExamInfo")]
+        public async Task<IActionResult> CreateExamInfo([FromBody] CreateExamInfoInput input)
+        {
+            //Check if module exist
+            if (await _moduleService.getModuleByID(input.ModuleId) is null)
+            {
+                return BadRequest(new ResponseDTO(400, "Module does not exist"));
+            }
+            //Check if student exist
+            foreach (var studentId in input.StudentIds)
+            {
+                //If student does not exist return BadRequest
+                if (_studentService.CheckStudentExist(studentId) == false)
+                {
+                    return BadRequest(new ResponseDTO(400, "Student does not exist"));
+                }
+            }
+            //Check if proctor exist
+            if (await _teacherService.IsTeacherExist(input.ProctorId) == false)
+            {
+                return BadRequest(new ResponseDTO(400, "Proctor does not exist"));
+            }
+            //Check if supervisor exist
+            if (await _teacherService.IsTeacherExist(input.SupervisorId) == false)
+            {
+                return BadRequest(new ResponseDTO(400, "Supervisor does not exist"));
+            }
+            //Check if grader exist
+            if (await _teacherService.IsTeacherExist(input.GraderId) == false)
+            {
+                return BadRequest(new ResponseDTO(400, "Grader does not exist"));
+            }
+            //Now we insert exam
+            Exam exam = _mapper.Map<Exam>(input);
+            Tuple<int, int> insertResult = await _examService.CreateExamInfo(exam);
+            if (insertResult.Item1 < 1)
+            {
+                return BadRequest(new ResponseDTO(400, "Error when insert exam"));
+            }
+            return Created(nameof(CreateExamInfo), new CreateExamInfoResponse(201, "Exam information successfully created", insertResult.Item2));
+        }
+        //get result of an exam
+        [HttpGet("result/{examId:int}")]
+        public async Task<IActionResult> GetResultExam(int examId, [FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<StudentMarkResponse> studentMarkResponse) = await _examService.GetResultExamByExamId(examId, paginationParameter);
+
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "Student mark not found"));
+            }
+
+            return Ok(new PaginationResponse<IEnumerable<StudentMarkResponse>>(totalRecord, studentMarkResponse));
+        }
+
     }
 }
