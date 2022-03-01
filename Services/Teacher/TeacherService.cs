@@ -13,7 +13,7 @@ namespace BackEnd.Services
         private readonly DataContext _dataContext;
         public TeacherService(DataContext dataContext)
         {
-            this._dataContext=dataContext;
+            this._dataContext = dataContext;
         }
 
         /// <summary>
@@ -24,6 +24,16 @@ namespace BackEnd.Services
         public async Task<Teacher> GetTeacherByEmail(string email)
         {
             return await _dataContext.Teachers.Where(s => s.Email.ToLower().Equals(email.ToLower()) && s.DeactivatedAt == null).FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Check whether the teacher exist in db
+        /// </summary>
+        /// <param name="teacherId"></param>
+        /// <returns></returns>
+        public bool IsTeacherExist(int teacherId)
+        {
+            return _dataContext.Teachers.Any(t => t.TeacherId == teacherId && t.DeactivatedAt == null);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.DTO.ExamQuestionsDTO;
+using BackEnd.DTO.QuestionDTO;
 using examedu.DTO.QuestionDTO;
 using ExamEdu.DB;
 using ExamEdu.DB.Models;
@@ -109,6 +110,106 @@ namespace examedu.Services
                 }
             }
             return questionAnswerList;
+        }
+
+        public async Task<int> InsertNewQuestionRequestInfor(AddQuestionRequest addQuestionRequest)
+        {
+            using (var dbContextTransaction = _dataContext.Database.BeginTransaction())
+            {
+                try
+                {
+                    int rowInserted = 0;
+                    _dataContext.AddQuestionRequests.Add(addQuestionRequest);
+                    rowInserted = await _dataContext.SaveChangesAsync();
+                    return rowInserted;
+                    dbContextTransaction.Commit();
+                }
+                catch (Exception)
+                {
+                    dbContextTransaction.Rollback();
+                    return 0;
+                }
+            }
+        }
+
+        public async Task<int> InsertNewQuestionsAndAnswers(List<QuestionInput> questions, int addQuestionRequestId, bool isFinalExam)
+        {
+            int rowInserted = 0;
+            if (isFinalExam == false)
+            {
+                foreach (var question in questions)
+                {
+                    using (var dbContextTransaction = _dataContext.Database.BeginTransaction())
+                    {
+                        try
+                        {
+                            Question ptQuestion = _mapper.Map<Question>(question);
+                            ptQuestion.AddQuestionRequestId = addQuestionRequestId;
+                            _dataContext.Questions.Add(ptQuestion);
+                            rowInserted = await _dataContext.SaveChangesAsync();
+
+                            if (rowInserted != 0)
+                            {
+                                foreach (var ptAnswer in question.Answers)
+                                {
+                                    Answer answer = _mapper.Map<Answer>(ptAnswer);
+                                    answer.QuestionId = ptQuestion.QuestionId;
+                                    _dataContext.Answers.Add(answer);
+                                    await _dataContext.SaveChangesAsync();
+                                }
+                            }
+                            else
+                            {
+                                return rowInserted;
+                            }
+                            dbContextTransaction.Commit();
+                        }
+                        catch (Exception)
+                        {
+                            dbContextTransaction.Rollback();
+                            return 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var question in questions)
+                {
+                    using (var dbContextTransaction = _dataContext.Database.BeginTransaction())
+                    {
+                        try
+                        {
+                            FEQuestion feQuestion = _mapper.Map<FEQuestion>(question);
+                            feQuestion.AddQuestionRequestId = addQuestionRequestId;
+                            _dataContext.FEQuestions.Add(feQuestion);
+                            rowInserted = await _dataContext.SaveChangesAsync();
+
+                            if (rowInserted != 0)
+                            {
+                                foreach (var feAnswer in question.Answers)
+                                {
+                                    FEAnswer answer = _mapper.Map<FEAnswer>(feAnswer);
+                                    answer.FEQuestionId = feQuestion.FEQuestionId;
+                                    _dataContext.FEAnswers.Add(answer);
+                                    await _dataContext.SaveChangesAsync();
+                                }
+                            }
+                            else
+                            {
+                                return rowInserted;
+                            }
+                            dbContextTransaction.Commit();
+                        }
+                        catch (Exception)
+                        {
+                            dbContextTransaction.Rollback();
+                            return 0;
+                        }
+                    }
+                }
+            }
+            return rowInserted;
         }
     }
 }

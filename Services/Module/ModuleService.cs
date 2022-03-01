@@ -139,11 +139,26 @@ namespace ExamEdu.Services
                              ModuleId = m.ModuleId,
                              ModuleCode = m.ModuleCode,
                              ModuleName = m.ModuleName,
-                             ClassModules = new List<ClassModule> { new ClassModule {ClassModuleId = cm.ClassModuleId, Class = c } }
+                             ClassModules = new List<ClassModule> { new ClassModule { ClassModuleId = cm.ClassModuleId, Class = c } }
                          };
             var modules = await result.ToListAsync();
 
             return Tuple.Create(modules.Count, modules.GetPage(paginationParameter));
+        }
+
+        public bool IsModuleExist(int moduleId)
+        {
+            return _db.Modules.Any(m => m.ModuleId == moduleId);
+        }
+
+        /// <summary>
+        /// Get all of the module ids of modules teacher teaches
+        /// </summary>
+        /// <param name="teacherId"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<int>> GetAllModuleIdByTeacherId(int teacherId)
+        {
+            return await _db.ClassModules.Where(t => t.TeacherId == teacherId).Select(m => m.ModuleId).ToListAsync();
         }
     }
 }

@@ -9,5 +9,6 @@ namespace BackEnd.Services
     public interface ITeacherService
     {
         Task<Teacher> GetTeacherByEmail(string email);
+        bool IsTeacherExist(int teacherId);
     }
 }
