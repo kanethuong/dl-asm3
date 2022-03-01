@@ -39,18 +39,19 @@ namespace ExamEdu.Services
             foreach (var examId in allExamOfStudent)
             {
                 var exam = await _db.Exams.Select(e => new Exam
-                {
-                    ExamId = e.ExamId,
-                    ExamName = e.ExamName,
-                    Description = e.Description,
-                    ExamDay = e.ExamDay,
-                    DurationInMinute = e.DurationInMinute,
-                    ModuleId = e.ModuleId,
-                    Module = new Module
-                    {
-                        ModuleCode = e.Module.ModuleCode
-                    }
-                }).FirstOrDefaultAsync(e => e.ExamId == examId);
+                                {
+                                    ExamId = e.ExamId,
+                                    ExamName = e.ExamName,
+                                    Description = e.Description,
+                                    ExamDay = e.ExamDay,
+                                    DurationInMinute = e.DurationInMinute,
+                                    ModuleId = e.ModuleId,
+                                    Password=e.Password,
+                                    Module = new Module
+                                    {
+                                        ModuleCode=e.Module.ModuleCode
+                                    }
+                                }).FirstOrDefaultAsync(e => e.ExamId == examId);
                 if (exam is not null)
                 {
                     examList.Add(exam);
