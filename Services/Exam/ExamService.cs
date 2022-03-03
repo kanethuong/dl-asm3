@@ -39,19 +39,19 @@ namespace ExamEdu.Services
             foreach (var examId in allExamOfStudent)
             {
                 var exam = await _db.Exams.Select(e => new Exam
-                                {
-                                    ExamId = e.ExamId,
-                                    ExamName = e.ExamName,
-                                    Description = e.Description,
-                                    ExamDay = e.ExamDay,
-                                    DurationInMinute = e.DurationInMinute,
-                                    ModuleId = e.ModuleId,
-                                    Password=e.Password,
-                                    Module = new Module
-                                    {
-                                        ModuleCode=e.Module.ModuleCode
-                                    }
-                                }).FirstOrDefaultAsync(e => e.ExamId == examId);
+                {
+                    ExamId = e.ExamId,
+                    ExamName = e.ExamName,
+                    Description = e.Description,
+                    ExamDay = e.ExamDay,
+                    DurationInMinute = e.DurationInMinute,
+                    ModuleId = e.ModuleId,
+                    Password = e.Password,
+                    Module = new Module
+                    {
+                        ModuleCode = e.Module.ModuleCode
+                    }
+                }).FirstOrDefaultAsync(e => e.ExamId == examId);
                 if (exam is not null)
                 {
                     examList.Add(exam);
@@ -379,6 +379,7 @@ namespace ExamEdu.Services
                                                                 ExamDay = y.x.e.ExamDay,
                                                                 StudentId = y.s.StudentId,
                                                                 StudentName = y.s.Fullname,
+                                                                StudentEmail = y.s.Email,
                                                                 FinishedAt = y.x.sei.FinishAt,
                                                                 Mark = y.x.sei.Mark,
                                                                 NeedToGradeTextQuestion = y.x.sei.NeedToGradeTextQuestion,
