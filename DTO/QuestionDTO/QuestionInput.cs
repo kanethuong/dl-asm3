@@ -14,6 +14,10 @@ namespace BackEnd.DTO.QuestionDTO
         [Required]
         public int QuestionTypeId { get; set; }
         [Required]
+        public int LevelId { get; set; }
+        [Required]
+        public int ModuleId { get; set; }
+        [Required]
         public List<AnswerInput> Answers { get; set; }
     }
 }

@@ -12,12 +12,8 @@ namespace BackEnd.DTO.QuestionDTO
         public int RequesterId { get; set; }
         public string Description { get; set; }
         [Required]
-        public int LevelId { get; set; }
-        [Required]
-        public int ModuleId { get; set; }
-        [Required]
         public bool isFinalExam { get; set; }
         [Required]
-        public List<QuestionInput> Questions { get; set; }
+        public ICollection<QuestionInput> Questions { get; set; }
     }
 }

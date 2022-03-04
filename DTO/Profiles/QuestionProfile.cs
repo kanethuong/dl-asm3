@@ -25,20 +25,33 @@ namespace examedu.DTO.Profiles
             CreateMap<RequestAddQuestionInput, AddQuestionRequest>()
                     .ForMember(dest => dest.Questions, opt =>
                     {
-                        opt.PreCondition(src => src.isFinalExam == false);
+                        opt.Condition(src => src.isFinalExam == false);
                         opt.MapFrom(src => src.Questions);
                     })
                     .ForMember(dest => dest.FEQuestions, opt =>
                     {
-                        opt.PreCondition(src => src.isFinalExam == true);
+                        opt.Condition(src => src.isFinalExam == true);
                         opt.MapFrom(src => src.Questions);
-                    })
-                    .ForMember(dest => dest.Questions.Select(q => q.LevelId), opt => opt.MapFrom(src => src.LevelId))
-                    .ForMember(dest => dest.Questions.Select(q => q.ModuleId), opt => opt.MapFrom(src => src.ModuleId));
+                    });
             CreateMap<QuestionInput, Question>();
-            CreateMap<QuestionInput, FEQuestion>();
+            CreateMap<QuestionInput, FEQuestion>()
+                    .ForMember(dest => dest.FEAnswers, opt => opt.MapFrom(src => src.Answers));
             CreateMap<AnswerInput, Answer>();
             CreateMap<AnswerInput, FEAnswer>();
+            CreateMap<AddQuestionRequest, RequestAddQuestionResponse>()
+                    .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.Requester.Fullname))
+                    .ForMember(dest => dest.ModuleName, opt =>
+                         opt.MapFrom(src =>
+                            src.AddQuestionRequestId == src.Questions.Select(q => q.AddQuestionRequestId).FirstOrDefault()
+                            ? src.Questions.Select(q => q.Module.ModuleName).FirstOrDefault() : src.FEQuestions.Select(q => q.Module.ModuleName).FirstOrDefault()
+                    ))
+                    .ForMember(dest => dest.NumberOfQuestion, opt =>
+                           opt.MapFrom(src =>
+                            src.AddQuestionRequestId == src.Questions.Select(q => q.AddQuestionRequestId).FirstOrDefault()
+                            ? src.Questions.Count() : src.FEQuestions.Count())
+                    )
+                    .ForMember(dest => dest.IsAssigned, opt => opt.MapFrom(src => src.ApproverId != null ? true : false));
+
         }
     }
 }

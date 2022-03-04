@@ -9,6 +9,7 @@ using examedu.DTO.QuestionDTO;
 using examedu.Services;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
+using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,12 +66,12 @@ namespace examedu.Controllers
         [HttpPost("request")]
         public async Task<ActionResult> RequestAddQuestionToBank([FromBody] RequestAddQuestionInput input)
         {
-            if (_teacherService.IsTeacherExist(input.RequesterId) == false)
+            if (await _teacherService.IsTeacherExist(input.RequesterId) == false)
             {
                 return NotFound(new ResponseDTO(404, "Requester is not exist"));
             }
 
-            if (!_moduleService.IsModuleExist(input.ModuleId))
+            if (!_moduleService.IsModuleExist(input.Questions.First().ModuleId))
             {
                 return NotFound(new ResponseDTO(404, "Module is not exist"));
             }
@@ -78,31 +79,50 @@ namespace examedu.Controllers
             IEnumerable<int> moduleIds = await _moduleService.GetAllModuleIdByTeacherId(input.RequesterId);
             foreach (var moduleId in moduleIds)
             {
-                if (moduleId != input.ModuleId)
+                if (moduleId != input.Questions.First().ModuleId)
                 {
                     return NotFound(new ResponseDTO(404, "Requester not teach this module"));
                 }
             }
 
-            if (_levelService.IsLevelExist(input.LevelId) == false)
+            if (_levelService.IsLevelExist(input.Questions.First().LevelId) == false)
             {
                 return NotFound(new ResponseDTO(404, "Level is not exist"));
             }
 
             AddQuestionRequest addQuestionRequest = _mapper.Map<AddQuestionRequest>(input);
-            int rs = await _questionService.InsertNewQuestionRequestInfor(addQuestionRequest);
+            int rs = await _questionService.InsertNewRequestAddQuestions(addQuestionRequest);
             if (rs == 0)
             {
                 return BadRequest(new ResponseDTO(409, "Failed to send request"));
             }
 
-            // rs = await _questionService.InsertNewQuestionsAndAnswers(input.Questions, addQuestionRequestId, input.isFinalExam);
-            // if (rs == 0)
-            // {
-            //     return BadRequest(new ResponseDTO(409, "Failed to send request"));
-            // }
-
             return Ok(new ResponseDTO(200, "Request add questions success."));
+        }
+
+        [HttpGet("requestList")]
+        public async Task<ActionResult<PaginationResponse<IEnumerable<RequestAddQuestionResponse>>>> ViewAllRequestAddQuestionBank([FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<AddQuestionRequest> requestList) = await _questionService.GetAllRequestAddQuestionBank(paginationParameter);
+
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "Request list cannot be found"));
+            }
+
+            var requestResponse = _mapper.Map<IEnumerable<RequestAddQuestionResponse>>(requestList);
+            foreach (var request in requestResponse)
+            {
+                if (_questionService.IsFinalExamBank(request.AddQuestionRequestId))
+                {
+                    request.IsFinalExamBank = true;
+                }
+                else
+                {
+                    request.IsFinalExamBank = false;
+                }
+            }
+            return Ok(new PaginationResponse<IEnumerable<RequestAddQuestionResponse>>(totalRecord, requestResponse));
         }
     }
 }

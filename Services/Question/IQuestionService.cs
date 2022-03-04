@@ -6,6 +6,7 @@ using BackEnd.DTO.ExamQuestionsDTO;
 using BackEnd.DTO.QuestionDTO;
 using examedu.DTO.QuestionDTO;
 using ExamEdu.DB.Models;
+using ExamEdu.DTO.PaginationDTO;
 
 namespace examedu.Services
 {
@@ -13,7 +14,8 @@ namespace examedu.Services
     {
         Task<List<QuestionResponse>> getQuestionByModuleLevel(int moduleID, int levelID, bool isFinalExam);
         Task<List<QuestionAnswerResponse>> GetListQuestionAnswerByListQuestionId(List<int> questionIdList, int examId, int examCode, bool isFinalExam);
-        Task<int> InsertNewQuestionRequestInfor(AddQuestionRequest addQuestionRequest);
-        Task<int> InsertNewQuestionsAndAnswers(List<QuestionInput> questions, int addQuestionRequestId, bool isFinalExam);
+        Task<int> InsertNewRequestAddQuestions(AddQuestionRequest addQuestionRequest);
+        Task<Tuple<int, IEnumerable<AddQuestionRequest>>> GetAllRequestAddQuestionBank(PaginationParameter paginationParameter);
+        bool IsFinalExamBank(int addQuestionRequestId);
     }
 }

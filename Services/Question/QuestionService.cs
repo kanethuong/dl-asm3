@@ -8,6 +8,8 @@ using BackEnd.DTO.QuestionDTO;
 using examedu.DTO.QuestionDTO;
 using ExamEdu.DB;
 using ExamEdu.DB.Models;
+using ExamEdu.DTO.PaginationDTO;
+using ExamEdu.Helper;
 using Microsoft.EntityFrameworkCore;
 
 namespace examedu.Services
@@ -112,7 +114,7 @@ namespace examedu.Services
             return questionAnswerList;
         }
 
-        public async Task<int> InsertNewQuestionRequestInfor(AddQuestionRequest addQuestionRequest)
+        public async Task<int> InsertNewRequestAddQuestions(AddQuestionRequest addQuestionRequest)
         {
             using (var dbContextTransaction = _dataContext.Database.BeginTransaction())
             {
@@ -121,8 +123,8 @@ namespace examedu.Services
                     int rowInserted = 0;
                     _dataContext.AddQuestionRequests.Add(addQuestionRequest);
                     rowInserted = await _dataContext.SaveChangesAsync();
-                    return rowInserted;
                     dbContextTransaction.Commit();
+                    return rowInserted;
                 }
                 catch (Exception)
                 {
@@ -132,84 +134,44 @@ namespace examedu.Services
             }
         }
 
-        public async Task<int> InsertNewQuestionsAndAnswers(List<QuestionInput> questions, int addQuestionRequestId, bool isFinalExam)
+        public async Task<Tuple<int, IEnumerable<AddQuestionRequest>>> GetAllRequestAddQuestionBank(PaginationParameter paginationParameter)
         {
-            int rowInserted = 0;
-            if (isFinalExam == false)
+            IQueryable<AddQuestionRequest> requests = _dataContext.AddQuestionRequests;
+            if (paginationParameter.SearchName != "")
             {
-                foreach (var question in questions)
-                {
-                    using (var dbContextTransaction = _dataContext.Database.BeginTransaction())
-                    {
-                        try
-                        {
-                            Question ptQuestion = _mapper.Map<Question>(question);
-                            ptQuestion.AddQuestionRequestId = addQuestionRequestId;
-                            _dataContext.Questions.Add(ptQuestion);
-                            rowInserted = await _dataContext.SaveChangesAsync();
-
-                            if (rowInserted != 0)
-                            {
-                                foreach (var ptAnswer in question.Answers)
-                                {
-                                    Answer answer = _mapper.Map<Answer>(ptAnswer);
-                                    answer.QuestionId = ptQuestion.QuestionId;
-                                    _dataContext.Answers.Add(answer);
-                                    await _dataContext.SaveChangesAsync();
-                                }
-                            }
-                            else
-                            {
-                                return rowInserted;
-                            }
-                            dbContextTransaction.Commit();
-                        }
-                        catch (Exception)
-                        {
-                            dbContextTransaction.Rollback();
-                            return 0;
-                        }
-                    }
-                }
+                requests = requests.Where(r => EF.Functions.ToTsVector("simple", EF.Functions.Unaccent(r.Requester.Fullname.ToLower()))
+                      .Matches(EF.Functions.ToTsQuery("simple", EF.Functions.Unaccent(paginationParameter.SearchName.ToLower()))));
             }
-            else
+
+            IEnumerable<AddQuestionRequest> requestList = await requests
+                                                .GetCount(out var totalRecord)
+                                                .GetPage(paginationParameter)
+                                                .Select(r => new AddQuestionRequest
+                                                {
+                                                    AddQuestionRequestId = r.AddQuestionRequestId,
+                                                    Requester = new Teacher
+                                                    {
+                                                        Fullname = r.Requester.Fullname
+                                                    },
+                                                    CreatedAt = r.CreatedAt,
+                                                    Description = r.Description,
+                                                    Questions = r.Questions,
+                                                    FEQuestions = r.FEQuestions.ToList(),
+                                                    ApproverId = r.ApproverId,
+                                                })
+                                                .OrderByDescending(r => r.CreatedAt)
+                                                .ToListAsync();
+
+            return Tuple.Create(totalRecord, requestList);
+        }
+
+        public bool IsFinalExamBank(int addQuestionRequestId)
+        {
+            if (_dataContext.FEQuestions.Where(q => q.AddQuestionRequestId == addQuestionRequestId).First() != null)
             {
-                foreach (var question in questions)
-                {
-                    using (var dbContextTransaction = _dataContext.Database.BeginTransaction())
-                    {
-                        try
-                        {
-                            FEQuestion feQuestion = _mapper.Map<FEQuestion>(question);
-                            feQuestion.AddQuestionRequestId = addQuestionRequestId;
-                            _dataContext.FEQuestions.Add(feQuestion);
-                            rowInserted = await _dataContext.SaveChangesAsync();
-
-                            if (rowInserted != 0)
-                            {
-                                foreach (var feAnswer in question.Answers)
-                                {
-                                    FEAnswer answer = _mapper.Map<FEAnswer>(feAnswer);
-                                    answer.FEQuestionId = feQuestion.FEQuestionId;
-                                    _dataContext.FEAnswers.Add(answer);
-                                    await _dataContext.SaveChangesAsync();
-                                }
-                            }
-                            else
-                            {
-                                return rowInserted;
-                            }
-                            dbContextTransaction.Commit();
-                        }
-                        catch (Exception)
-                        {
-                            dbContextTransaction.Rollback();
-                            return 0;
-                        }
-                    }
-                }
+                return true;
             }
-            return rowInserted;
+            return false;
         }
     }
 }
