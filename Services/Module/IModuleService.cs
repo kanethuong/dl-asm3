@@ -19,5 +19,7 @@ namespace ExamEdu.Services
         Task<int> InsertNewModule(ModuleInput moduleInput);
         Task<int> UpdateModule(ModuleInput moduleInput);
         Task<int> DeleteModule(int id);
+        bool IsModuleExist(int moduleId);
+        Task<IEnumerable<int>> GetAllModuleIdByTeacherId(int teacherId);
     }
 }
