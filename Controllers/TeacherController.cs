@@ -48,6 +48,10 @@ namespace ExamEdu.Controllers
             return Ok(new PaginationResponse<IEnumerable<ModuleTeacherResponse>>(totalRecord, classModuleResponses));
         }
 
-
+        [HttpGet("IdName")]
+        public async Task<ActionResult<Dictionary<int,string>>> GetAllTeacherIdAndName()
+        {
+            return Ok(await _teacherService.GetAllTeacherIdAndName());
+        }
     }
 }

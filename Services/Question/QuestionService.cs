@@ -155,7 +155,7 @@ namespace examedu.Services
                                                     },
                                                     CreatedAt = r.CreatedAt,
                                                     Description = r.Description,
-                                                    Questions = r.Questions,
+                                                    Questions = r.Questions.ToList(),
                                                     FEQuestions = r.FEQuestions.ToList(),
                                                     ApproverId = r.ApproverId,
                                                 })
@@ -167,11 +167,46 @@ namespace examedu.Services
 
         public bool IsFinalExamBank(int addQuestionRequestId)
         {
-            if (_dataContext.FEQuestions.Where(q => q.AddQuestionRequestId == addQuestionRequestId).First() != null)
+            if (_dataContext.FEQuestions.Where(q => q.AddQuestionRequestId == addQuestionRequestId).FirstOrDefault() != null)
             {
                 return true;
             }
             return false;
+        }
+
+        public async Task<string> GetModuleName(int addQuestionRequestId, bool isFinalExam)
+        {
+            string moduleName;
+            if (isFinalExam)
+            {
+                moduleName = await _dataContext.FEQuestions.Where(q => q.AddQuestionRequestId == addQuestionRequestId && q.Module.ModuleName != null).Select(q => q.Module.ModuleName).FirstOrDefaultAsync();
+            }
+            else
+            {
+                moduleName = await _dataContext.Questions.Where(q => q.AddQuestionRequestId == addQuestionRequestId && q.Module.ModuleName != null).Select(q => q.Module.ModuleName).FirstOrDefaultAsync();
+            }
+            return moduleName;
+        }
+
+        public async Task<int> AssignTeacherToApproveRequest(int addQuestionRequestId, int teacherId)
+        {
+            int rowInserted = 0;
+            var addQuestionRequest = await _dataContext.AddQuestionRequests.Where(s => s.AddQuestionRequestId == addQuestionRequestId).FirstOrDefaultAsync();
+            if (addQuestionRequest != null)
+            {
+                if (addQuestionRequest.ApproverId != null)
+                {
+                    return -1;
+                }
+                addQuestionRequest.ApproverId = teacherId;
+            }
+            else
+            {
+                return -2;
+            }
+            _dataContext.AddQuestionRequests.Update(addQuestionRequest);
+            rowInserted = await _dataContext.SaveChangesAsync();
+            return rowInserted;
         }
     }
 }
