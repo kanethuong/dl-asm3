@@ -51,14 +51,14 @@ namespace ExamEdu.Services
                                                                  t => t.TeacherId,
                                                                  (c, t) => new ModuleResponse
                                                                  {
-                                                                    ModuleId=c.ModuleId,
-                                                                    ModuleCode=c.ModuleCode,
-                                                                    ModuleName=c.ModuleName,
-                                                                    TeacherEmail=t.Email
+                                                                     ModuleId = c.ModuleId,
+                                                                     ModuleCode = c.ModuleCode,
+                                                                     ModuleName = c.ModuleName,
+                                                                     TeacherEmail = t.Email
                                                                  })
                                                                     .ToListAsync();
 
-            
+
             return Tuple.Create(moduleList.Count, moduleList.GetPage(paginationParameter));
 
         }
@@ -144,6 +144,7 @@ namespace ExamEdu.Services
             var result = from m in _db.Modules
                          join cm in _db.ClassModules on m.ModuleId equals cm.ModuleId
                          join c in _db.Classes on cm.ClassId equals c.ClassId
+                         where cm.TeacherId == teacherId
                          select new Module
                          {
                              ModuleId = m.ModuleId,
@@ -170,7 +171,7 @@ namespace ExamEdu.Services
         {
             return await _db.ClassModules.Where(t => t.TeacherId == teacherId).Select(m => m.ModuleId).ToListAsync();
         }
-        
+
         public async Task<Tuple<int, IEnumerable<Module>>> getModulesByTeacherId(int teacherId, PaginationParameter paginationParameter)
         {
             var queryResult = from m in _db.Modules
