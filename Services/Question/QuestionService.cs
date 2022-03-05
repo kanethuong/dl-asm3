@@ -114,6 +114,11 @@ namespace examedu.Services
             return questionAnswerList;
         }
 
+        /// <summary>
+        /// Create new request to add questions to bank
+        /// </summary>
+        /// <param name="addQuestionRequest"></param>
+        /// <returns>Row inserted</returns>
         public async Task<int> InsertNewRequestAddQuestions(AddQuestionRequest addQuestionRequest)
         {
             using (var dbContextTransaction = _dataContext.Database.BeginTransaction())
@@ -134,6 +139,11 @@ namespace examedu.Services
             }
         }
 
+        /// <summary>
+        /// Get all the requests to add quesions to bank with pagination
+        /// </summary>
+        /// <param name="paginationParameter"></param>
+        /// <returns></returns>
         public async Task<Tuple<int, IEnumerable<AddQuestionRequest>>> GetAllRequestAddQuestionBank(PaginationParameter paginationParameter)
         {
             IQueryable<AddQuestionRequest> requests = _dataContext.AddQuestionRequests;
@@ -165,6 +175,11 @@ namespace examedu.Services
             return Tuple.Create(totalRecord, requestList);
         }
 
+        /// <summary>
+        /// Check whether the bank is final
+        /// </summary>
+        /// <param name="addQuestionRequestId"></param>
+        /// <returns></returns>
         public bool IsFinalExamBank(int addQuestionRequestId)
         {
             if (_dataContext.FEQuestions.Where(q => q.AddQuestionRequestId == addQuestionRequestId).FirstOrDefault() != null)
@@ -174,6 +189,12 @@ namespace examedu.Services
             return false;
         }
 
+        /// <summary>
+        /// Get a module's name by addQuestionRequestId
+        /// </summary>
+        /// <param name="addQuestionRequestId"></param>
+        /// <param name="isFinalExam">To check for getting the module's name in fe bank or pt bank</param>
+        /// <returns></returns>
         public async Task<string> GetModuleName(int addQuestionRequestId, bool isFinalExam)
         {
             string moduleName;
@@ -188,6 +209,12 @@ namespace examedu.Services
             return moduleName;
         }
 
+        /// <summary>
+        /// Assign a teacher to approve the request add questions to bank
+        /// </summary>
+        /// <param name="addQuestionRequestId"></param>
+        /// <param name="teacherId"></param>
+        /// <returns></returns>
         public async Task<int> AssignTeacherToApproveRequest(int addQuestionRequestId, int teacherId)
         {
             int rowInserted = 0;

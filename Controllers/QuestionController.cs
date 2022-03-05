@@ -135,7 +135,7 @@ namespace examedu.Controllers
             return Ok(new PaginationResponse<IEnumerable<RequestAddQuestionResponse>>(totalRecord, requestResponse));
         }
 
-        [HttpPut("AssignTeacher")]
+        [HttpPut("assignTeacher")]
         public async Task<IActionResult> AssignTeacherToApproveRequest(int addQuestionRequestId, int teacherId)
         {
             if (await _teacherService.IsTeacherExist(teacherId) == false)
