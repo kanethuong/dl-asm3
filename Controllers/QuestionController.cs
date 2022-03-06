@@ -100,10 +100,13 @@ namespace examedu.Controllers
             return Ok(new ResponseDTO(200, "Request add questions success."));
         }
 
-        [HttpGet("requestList/{teacherId:int}")]
-        public async Task<ActionResult<PaginationResponse<IEnumerable<RequestAddQuestionResponse>>>> ViewAllRequestAddQuestionBank(int teacherId, [FromQuery] PaginationParameter paginationParameter)
+        [HttpGet("requestList")]
+        public async Task<ActionResult<PaginationResponse<IEnumerable<RequestAddQuestionResponse>>>> ViewAllRequestAddQuestionBank([FromQuery] int id, [FromQuery] PaginationParameter paginationParameter)
         {
-            
+            if (await _teacherService.IsHeadOfDepartment(id) == false)
+            {
+                return StatusCode(403, new ResponseDTO(403));
+            }
 
             (int totalRecord, IEnumerable<AddQuestionRequest> requestList) = await _questionService.GetAllRequestAddQuestionBank(paginationParameter);
 
@@ -138,8 +141,13 @@ namespace examedu.Controllers
         }
 
         [HttpPut("assignTeacher")]
-        public async Task<IActionResult> AssignTeacherToApproveRequest(int addQuestionRequestId, int teacherId)
+        public async Task<IActionResult> AssignTeacherToApproveRequest([FromQuery] int id, int addQuestionRequestId, int teacherId)
         {
+            if (await _teacherService.IsHeadOfDepartment(id) == false)
+            {
+                return StatusCode(403, new ResponseDTO(403));
+            }
+            
             if (await _teacherService.IsTeacherExist(teacherId) == false)
             {
                 return NotFound(new ResponseDTO(404, "Teacher is not exist"));

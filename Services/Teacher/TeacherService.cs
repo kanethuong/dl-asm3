@@ -46,9 +46,9 @@ namespace BackEnd.Services
             return teacherDict;
         }
 
-        // public async Task<bool> IsHeadOfDepartment(int teacherId)
-        // {
-        //     return await _dataContext.Teachers.Where(t=>t.TeacherId==teacherId && t.DeactivatedAt==null).Select(t=>t.)
-        // }
+        public async Task<bool> IsHeadOfDepartment(int teacherId)
+        {
+            return await _dataContext.Teachers.Where(t=>t.TeacherId==teacherId && t.DeactivatedAt==null).Select(t=>t.isHeadOfDepartment).FirstOrDefaultAsync();
+        }
     }
 }
