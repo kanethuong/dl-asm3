@@ -53,5 +53,18 @@ namespace ExamEdu.Controllers
         {
             return Ok(await _teacherService.GetAllTeacherIdAndName());
         }
+
+        //http get teacherId parameter
+        [HttpGet("check/{teacherId:int}")]
+        //return 200 status code if teacher is IsHeadOfDepartment
+        public async Task<ActionResult<bool>> IsHeadOfDepartment(int teacherId)
+        {
+            
+            if (await _teacherService.IsTeacherExist(teacherId) == false)
+            {
+                return NotFound(new ResponseDTO(404, "Teacher Not Found"));
+            }
+            return Ok(await _teacherService.IsHeadOfDepartment(teacherId));
+        }
     }
 }
