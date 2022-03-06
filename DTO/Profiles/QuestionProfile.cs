@@ -48,33 +48,53 @@ namespace examedu.DTO.Profiles
                     .ForMember(dest => dest.IsAssigned, opt => opt.MapFrom(src => src.ApproverId != null ? true : false));
             CreateMap<AddQuestionRequest, RequestAddQuestionDetailResponse>()
                     .ForMember(dest => dest.ModuleName, opt =>
-                       opt.MapFrom(src =>
-                       src.Questions.Where(q => q.AddQuestionRequestId == src.AddQuestionRequestId).FirstOrDefault() != null
-                       ? src.Questions.Select(q => q.Module.ModuleName).FirstOrDefault() : src.FEQuestions.Select(q => q.Module.ModuleName).FirstOrDefault())
+                       opt.MapFrom((src, dest) =>
+                        {
+                            if (dest.IsFinalExamBank == true)
+                            {
+                                return src.FEQuestions.Select(q => q.Module.ModuleName).FirstOrDefault();
+                            }
+                            else
+                            {
+                                return src.Questions.Select(q => q.Module.ModuleName).FirstOrDefault();
+                            }
+                        }
+                       )
                     )
                     .ForMember(dest => dest.LevelName, opt =>
-                        opt.MapFrom(src =>
-                        src.Questions.Where(q => q.AddQuestionRequestId == src.AddQuestionRequestId).FirstOrDefault() != null
-                        ? src.Questions.Select(q => q.Level.LevelName).FirstOrDefault() : src.FEQuestions.Select(q => q.Level.LevelName).FirstOrDefault())
+                       opt.MapFrom((src, dest) =>
+                        {
+                            if (dest.IsFinalExamBank == true)
+                            {
+                                return src.FEQuestions.Select(q => q.Level.LevelName).FirstOrDefault();
+                            }
+                            else
+                            {
+                                return src.Questions.Select(q => q.Level.LevelName).FirstOrDefault();
+                            }
+                        }
+                       )
                     );
                     // .ForMember(dest => dest.Questions, opt =>
+                    //     opt.MapFrom((src, dest) =>
                     //     {
-                    //         opt.PreCondition(src => src.Questions.Where(q => q.AddQuestionRequestId == src.AddQuestionRequestId).FirstOrDefault() != null);
-                    //         opt.MapFrom(src => src.Questions);
+                    //         if (dest.IsFinalExamBank == true)
+                    //         {
+                    //             return src.FEQuestions;
+                    //         }
+                    //         else
+                    //         {
+                    //             return src.Questions;
+                    //         }
                     //     }
-                    // )
-                    // .ForMember(dest => dest.Questions, opt =>
-                    //     {
-                    //         opt.PreCondition(src => src.Questions.Where(q => q.AddQuestionRequestId == src.AddQuestionRequestId).FirstOrDefault() == null);
-                    //         opt.MapFrom(src => src.FEQuestions);
-                    //     }
+                    //    )
                     // );
             CreateMap<Question, QuestionInRequestResponse>();
             CreateMap<FEQuestion, QuestionInRequestResponse>()
                     .ForMember(dest => dest.QuestionId, opt => opt.MapFrom(src => src.FEQuestionId))
-                    .ForMember(dest=>dest.Answers,opt=>opt.MapFrom(src=>src.FEAnswers));
-            CreateMap<Answer,AnswerResponse>();
-            CreateMap<FEAnswer,AnswerResponse>();
+                    .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.FEAnswers));
+            CreateMap<Answer, AnswerResponse>();
+            CreateMap<FEAnswer, AnswerResponse>();
         }
     }
 }
