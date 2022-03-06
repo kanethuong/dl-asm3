@@ -195,7 +195,7 @@ namespace examedu.Services
         /// <param name="addQuestionRequestId"></param>
         /// <param name="isFinalExam">To check for getting the module's name in fe bank or pt bank</param>
         /// <returns></returns>
-        public async Task<string> GetModuleName(int addQuestionRequestId, bool isFinalExam)
+        public async Task<string> GetModuleNameByAddQuestionRequestId(int addQuestionRequestId, bool isFinalExam)
         {
             string moduleName;
             if (isFinalExam)
@@ -234,6 +234,55 @@ namespace examedu.Services
             _dataContext.AddQuestionRequests.Update(addQuestionRequest);
             rowInserted = await _dataContext.SaveChangesAsync();
             return rowInserted;
+        }
+
+        public async Task<bool> IsRequestExist(int addQuestionRequestId)
+        {
+            return await _dataContext.AddQuestionRequests.Where(s => s.AddQuestionRequestId == addQuestionRequestId).AnyAsync();
+        }
+
+        public async Task<AddQuestionRequest> GetRequestAddQuestionBankDetail(int addQuestionRequestId)
+        {
+            var request = await _dataContext.AddQuestionRequests
+                                        .Where(r => r.AddQuestionRequestId == addQuestionRequestId)
+                                        .Select(r => new AddQuestionRequest
+                                        {
+                                            AddQuestionRequestId = r.AddQuestionRequestId,
+                                            Questions = r.Questions.Select(q => new Question
+                                            {
+                                                QuestionId = q.QuestionId,
+                                                QuestionContent = q.QuestionContent,
+                                                QuestionImageURL = q.QuestionImageURL,
+                                                Module = new Module
+                                                {
+                                                    ModuleName = q.Module.ModuleName
+                                                },
+                                                Level = new Level
+                                                {
+                                                    LevelName = q.Level.LevelName
+                                                },
+                                                Answers = q.Answers.ToList()
+                                            }).ToList(),
+                                            FEQuestions = r.FEQuestions.Select(q => new FEQuestion
+                                            {
+                                                FEQuestionId = q.FEQuestionId,
+                                                QuestionContent = q.QuestionContent,
+                                                QuestionImageURL = q.QuestionImageURL,
+                                                Module = new Module
+                                                {
+                                                    ModuleName = q.Module.ModuleName
+                                                },
+                                                Level = new Level
+                                                {
+                                                    LevelName = q.Level.LevelName
+                                                },
+                                                FEAnswers = q.FEAnswers.ToList()
+                                            }).ToList()
+                                            // Questions = r.Questions.ToList(),
+                                            // FEQuestions = r.FEQuestions.ToList()
+                                        })
+                                        .FirstOrDefaultAsync();
+            return request;
         }
     }
 }
