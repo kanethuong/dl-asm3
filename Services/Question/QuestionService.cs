@@ -319,5 +319,41 @@ namespace examedu.Services
             rowInserted = await _dataContext.SaveChangesAsync();
             return rowInserted;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="paginationParameter"></param>
+        /// <returns></returns>
+        public async Task<Tuple<int, IEnumerable<AddQuestionRequest>>> GetAllRequestAddQuestionByApproverId(int approverId, PaginationParameter paginationParameter)
+        {
+            IQueryable<AddQuestionRequest> requests = _dataContext.AddQuestionRequests.Where(r=>r.ApproverId==approverId);
+            if (paginationParameter.SearchName != "")
+            {
+                requests = requests.Where(r => EF.Functions.ToTsVector("simple", EF.Functions.Unaccent(r.Requester.Fullname.ToLower()))
+                      .Matches(EF.Functions.ToTsQuery("simple", EF.Functions.Unaccent(paginationParameter.SearchName.ToLower()))));
+            }
+
+            IEnumerable<AddQuestionRequest> requestList = await requests
+                                                .GetCount(out var totalRecord)
+                                                .GetPage(paginationParameter)
+                                                .Select(r => new AddQuestionRequest
+                                                {
+                                                    AddQuestionRequestId = r.AddQuestionRequestId,
+                                                    Requester = new Teacher
+                                                    {
+                                                        Fullname = r.Requester.Fullname
+                                                    },
+                                                    CreatedAt = r.CreatedAt,
+                                                    Description = r.Description,
+                                                    Questions = r.Questions.ToList(),
+                                                    FEQuestions = r.FEQuestions.ToList()
+                                                })
+                                                .OrderByDescending(r => r.CreatedAt)
+                                                .ToListAsync();
+
+            return Tuple.Create(totalRecord, requestList);
+        }
+
     }
 }

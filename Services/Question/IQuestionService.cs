@@ -22,5 +22,6 @@ namespace examedu.Services
         Task<bool> IsRequestExist(int addQuestionRequestId);
         Task<AddQuestionRequest> GetRequestAddQuestionBankDetail(int addQuestionRequestId);
         Task<int> ApproveQuestion(QuestionToApproveInput input);
+        Task<Tuple<int, IEnumerable<AddQuestionRequest>>> GetAllRequestAddQuestionByApproverId(int approverId, PaginationParameter paginationParameter);
     }
 }
