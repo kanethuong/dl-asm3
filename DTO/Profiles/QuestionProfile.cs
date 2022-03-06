@@ -46,6 +46,13 @@ namespace examedu.DTO.Profiles
                             ? src.Questions.Count() : src.FEQuestions.Count())
                     )
                     .ForMember(dest => dest.IsAssigned, opt => opt.MapFrom(src => src.ApproverId != null ? true : false));
+           
+            CreateMap<Question, QuestionInRequestResponse>();
+            CreateMap<FEQuestion, QuestionInRequestResponse>()
+                    .ForMember(dest => dest.QuestionId, opt => opt.MapFrom(src => src.FEQuestionId))
+                    .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.FEAnswers));
+            CreateMap<Answer, AnswerResponse>();
+            CreateMap<FEAnswer, AnswerResponse>();
             CreateMap<AddQuestionRequest, RequestAddQuestionDetailResponse>()
                     .ForMember(dest => dest.ModuleName, opt =>
                        opt.MapFrom((src, dest) =>
@@ -74,27 +81,21 @@ namespace examedu.DTO.Profiles
                             }
                         }
                        )
+                    )
+                    .ForMember(dest => dest.Questions, opt =>
+                        opt.MapFrom((src, dest) =>
+                        {
+                            if (dest.IsFinalExamBank == true)
+                            {
+                                return (object)src.FEQuestions;
+                            }
+                            else
+                            {
+                                return (object)src.Questions;
+                            }
+                        }
+                       )
                     );
-                    // .ForMember(dest => dest.Questions, opt =>
-                    //     opt.MapFrom((src, dest) =>
-                    //     {
-                    //         if (dest.IsFinalExamBank == true)
-                    //         {
-                    //             return src.FEQuestions;
-                    //         }
-                    //         else
-                    //         {
-                    //             return src.Questions;
-                    //         }
-                    //     }
-                    //    )
-                    // );
-            CreateMap<Question, QuestionInRequestResponse>();
-            CreateMap<FEQuestion, QuestionInRequestResponse>()
-                    .ForMember(dest => dest.QuestionId, opt => opt.MapFrom(src => src.FEQuestionId))
-                    .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.FEAnswers));
-            CreateMap<Answer, AnswerResponse>();
-            CreateMap<FEAnswer, AnswerResponse>();
         }
     }
 }

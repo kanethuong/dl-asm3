@@ -79,7 +79,11 @@ namespace examedu.Controllers
             IEnumerable<int> moduleIds = await _moduleService.GetAllModuleIdByTeacherId(input.RequesterId);
             foreach (var moduleId in moduleIds)
             {
-                if (moduleId != input.Questions.First().ModuleId)
+                if (moduleId == input.Questions.First().ModuleId)
+                {
+                    break;
+                }
+                else
                 {
                     return NotFound(new ResponseDTO(404, "Requester not teach this module"));
                 }
@@ -147,7 +151,7 @@ namespace examedu.Controllers
             {
                 return StatusCode(403, new ResponseDTO(403));
             }
-            
+
             if (await _teacherService.IsTeacherExist(teacherId) == false)
             {
                 return NotFound(new ResponseDTO(404, "Teacher is not exist"));
@@ -194,5 +198,10 @@ namespace examedu.Controllers
 
             return Ok(requestResponse);
         }
+
+        // public async Task<IActionResult> ApproveRequestAddQuestion([FromBody] IEnumerable<QuestionToApproveInput> inputList)
+        // {
+
+        // }
     }
 }
