@@ -199,9 +199,23 @@ namespace examedu.Controllers
             return Ok(requestResponse);
         }
 
-        // public async Task<IActionResult> ApproveRequestAddQuestion([FromBody] IEnumerable<QuestionToApproveInput> inputList)
-        // {
-
-        // }
+        [HttpPut("approveRequest")]
+        public async Task<IActionResult> ApproveRequestAddQuestion([FromBody] IEnumerable<QuestionToApproveInput> inputList)
+        {
+            int rs = 0;
+            foreach (var input in inputList)
+            {
+                rs = await _questionService.ApproveQuestion(input);
+                if (rs == -1)
+                {
+                    return NotFound(new ResponseDTO(404, "Question is not exist or has been approved"));
+                }
+                else if (rs == 0)
+                {
+                    return BadRequest(new ResponseDTO(400, "Failed to send request"));
+                }
+            }
+            return Ok(new ResponseDTO(200, "Approve request success"));
+        }
     }
 }

@@ -21,6 +21,6 @@ namespace examedu.Services
         Task<int> AssignTeacherToApproveRequest(int addQuestionRequestId, int teacherId);
         Task<bool> IsRequestExist(int addQuestionRequestId);
         Task<AddQuestionRequest> GetRequestAddQuestionBankDetail(int addQuestionRequestId);
-        Task<bool> IsQuestionExist(int questionId, bool isFinalExam);
+        Task<int> ApproveQuestion(QuestionToApproveInput input);
     }
 }

@@ -283,32 +283,41 @@ namespace examedu.Services
             return request;
         }
 
-        public async Task<bool> IsQuestionExist(int questionId, bool isFinalExam)
+        public async Task<int> ApproveQuestion(QuestionToApproveInput input)
         {
-            if (isFinalExam)
+            int rowInserted = 0;
+            if (input.IsFinalExamBank)
             {
-                return await _dataContext.FEQuestions.Where(q => q.FEQuestionId == questionId).AnyAsync();
+                var feQuestion = await _dataContext.FEQuestions.Where(q => q.FEQuestionId == input.QuestionId && q.ApproveAt == null).FirstOrDefaultAsync();
+                if (feQuestion != null)
+                {
+                    feQuestion.isApproved = input.isApproved;
+                    if (input.isApproved == true) { feQuestion.ApproveAt = DateTime.Now; }
+                    // feQuestion.Comment=input.Comment;
+                    _dataContext.FEQuestions.Update(feQuestion);
+                }
+                else
+                {
+                    return -1;
+                }
             }
             else
             {
-                return await _dataContext.Questions.Where(q => q.QuestionId == questionId).AnyAsync();
+                var question = await _dataContext.Questions.Where(q => q.QuestionId == input.QuestionId && q.ApproveAt == null).FirstOrDefaultAsync();
+                if (question != null)
+                {
+                    question.isApproved = input.isApproved;
+                    if (input.isApproved == true) { question.ApproveAt = DateTime.Now; }
+                    question.Comment = input.Comment;
+                    _dataContext.Questions.Update(question);
+                }
+                else
+                {
+                    return -1;
+                }
             }
+            rowInserted = await _dataContext.SaveChangesAsync();
+            return rowInserted;
         }
-
-        // public async Task<int> ApproveQuestion(QuestionToApproveInput input)
-        // {
-        //     int rowInserted = 0;
-        //     if (input.IsFinalExamBank)
-        //     {
-        //         var feQuestion = await _dataContext.FEQuestions.Where(q => q.FEQuestionId == input.QuestionId && q.ApproveAt == null).FirstOrDefaultAsync();
-        //         if (feQuestion != null)
-        //         {
-        //             feQuestion.isApproved=input.isApproved;
-        //             feQuestion.ApproveAt=DateTime.Now;
-        //             feQuestion.
-        //         }
-        //     }
-
-        // }
     }
 }
