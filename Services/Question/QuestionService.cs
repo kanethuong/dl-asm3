@@ -278,11 +278,37 @@ namespace examedu.Services
                                                 },
                                                 FEAnswers = q.FEAnswers.ToList()
                                             }).ToList()
-                                            // Questions = r.Questions.ToList(),
-                                            // FEQuestions = r.FEQuestions.ToList()
                                         })
                                         .FirstOrDefaultAsync();
             return request;
         }
+
+        public async Task<bool> IsQuestionExist(int questionId, bool isFinalExam)
+        {
+            if (isFinalExam)
+            {
+                return await _dataContext.FEQuestions.Where(q => q.FEQuestionId == questionId).AnyAsync();
+            }
+            else
+            {
+                return await _dataContext.Questions.Where(q => q.QuestionId == questionId).AnyAsync();
+            }
+        }
+
+        // public async Task<int> ApproveQuestion(QuestionToApproveInput input)
+        // {
+        //     int rowInserted = 0;
+        //     if (input.IsFinalExamBank)
+        //     {
+        //         var feQuestion = await _dataContext.FEQuestions.Where(q => q.FEQuestionId == input.QuestionId && q.ApproveAt == null).FirstOrDefaultAsync();
+        //         if (feQuestion != null)
+        //         {
+        //             feQuestion.isApproved=input.isApproved;
+        //             feQuestion.ApproveAt=DateTime.Now;
+        //             feQuestion.
+        //         }
+        //     }
+
+        // }
     }
 }
