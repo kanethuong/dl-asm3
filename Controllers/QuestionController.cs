@@ -77,16 +77,9 @@ namespace examedu.Controllers
             }
 
             IEnumerable<int> moduleIds = await _moduleService.GetAllModuleIdByTeacherId(input.RequesterId);
-            foreach (var moduleId in moduleIds)
+            if (moduleIds.AsQueryable().Any(id => id == input.Questions.First().ModuleId) == false)
             {
-                if (moduleId == input.Questions.First().ModuleId)
-                {
-                    break;
-                }
-                else
-                {
-                    return NotFound(new ResponseDTO(404, "Requester not teach this module"));
-                }
+                return NotFound(new ResponseDTO(404, "Requester not teach this module"));
             }
 
             if (_levelService.IsLevelExist(input.Questions.First().LevelId) == false)
@@ -216,6 +209,46 @@ namespace examedu.Controllers
                 }
             }
             return Ok(new ResponseDTO(200, "Approve request success"));
+        }
+
+        [HttpGet("requestList/{approverId:int}")]
+        public async Task<ActionResult<PaginationResponse<IEnumerable<RequestAddQuestionResponse>>>> ViewAllRequestAddQuestionBankByApproverId(int approverId, [FromQuery] PaginationParameter paginationParameter)
+        {
+            if (await _teacherService.IsTeacherExist(approverId) == false)
+            {
+                return NotFound(new ResponseDTO(404, "Approver is not exist"));
+            }
+
+            (int totalRecord, IEnumerable<AddQuestionRequest> requestList) = await _questionService.GetAllRequestAddQuestionByApproverId(approverId, paginationParameter);
+
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "Request list cannot be found"));
+            }
+
+            var requestResponse = _mapper.Map<IEnumerable<RequestAddQuestionResponse>>(requestList);
+            foreach (var request in requestResponse)
+            {
+                if (_questionService.IsFinalExamBank(request.AddQuestionRequestId))
+                {
+                    request.IsFinalExamBank = true;
+                    if (await _questionService.GetModuleNameByAddQuestionRequestId(request.AddQuestionRequestId, true) == null)
+                    {
+                        continue;
+                    }
+                    request.ModuleName = await _questionService.GetModuleNameByAddQuestionRequestId(request.AddQuestionRequestId, true);
+                }
+                else
+                {
+                    request.IsFinalExamBank = false;
+                    if (await _questionService.GetModuleNameByAddQuestionRequestId(request.AddQuestionRequestId, false) == null)
+                    {
+                        continue;
+                    }
+                    request.ModuleName = await _questionService.GetModuleNameByAddQuestionRequestId(request.AddQuestionRequestId, false);
+                }
+            }
+            return Ok(new PaginationResponse<IEnumerable<RequestAddQuestionResponse>>(totalRecord, requestResponse));
         }
     }
 }
