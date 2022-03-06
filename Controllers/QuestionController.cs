@@ -100,9 +100,11 @@ namespace examedu.Controllers
             return Ok(new ResponseDTO(200, "Request add questions success."));
         }
 
-        [HttpGet("requestList")]
-        public async Task<ActionResult<PaginationResponse<IEnumerable<RequestAddQuestionResponse>>>> ViewAllRequestAddQuestionBank([FromQuery] PaginationParameter paginationParameter)
+        [HttpGet("requestList/{teacherId:int}")]
+        public async Task<ActionResult<PaginationResponse<IEnumerable<RequestAddQuestionResponse>>>> ViewAllRequestAddQuestionBank(int teacherId, [FromQuery] PaginationParameter paginationParameter)
         {
+            
+
             (int totalRecord, IEnumerable<AddQuestionRequest> requestList) = await _questionService.GetAllRequestAddQuestionBank(paginationParameter);
 
             if (totalRecord == 0)
@@ -116,20 +118,20 @@ namespace examedu.Controllers
                 if (_questionService.IsFinalExamBank(request.AddQuestionRequestId))
                 {
                     request.IsFinalExamBank = true;
-                    if (await _questionService.GetModuleName(request.AddQuestionRequestId, true) == null)
+                    if (await _questionService.GetModuleNameByAddQuestionRequestId(request.AddQuestionRequestId, true) == null)
                     {
                         continue;
                     }
-                    request.ModuleName = await _questionService.GetModuleName(request.AddQuestionRequestId, true);
+                    request.ModuleName = await _questionService.GetModuleNameByAddQuestionRequestId(request.AddQuestionRequestId, true);
                 }
                 else
                 {
                     request.IsFinalExamBank = false;
-                    if (await _questionService.GetModuleName(request.AddQuestionRequestId, false) == null)
+                    if (await _questionService.GetModuleNameByAddQuestionRequestId(request.AddQuestionRequestId, false) == null)
                     {
                         continue;
                     }
-                    request.ModuleName = await _questionService.GetModuleName(request.AddQuestionRequestId, false);
+                    request.ModuleName = await _questionService.GetModuleNameByAddQuestionRequestId(request.AddQuestionRequestId, false);
                 }
             }
             return Ok(new PaginationResponse<IEnumerable<RequestAddQuestionResponse>>(totalRecord, requestResponse));
@@ -160,6 +162,29 @@ namespace examedu.Controllers
             {
                 return Ok(new ResponseDTO(200, "Assign teacher success"));
             }
+        }
+
+        [HttpGet("request/{addQuestionRequestId:int}")]
+        public async Task<ActionResult<RequestAddQuestionDetailResponse>> ViewRequestAddQuestionDetail(int addQuestionRequestId)
+        {
+            if (await _questionService.IsRequestExist(addQuestionRequestId) == false)
+            {
+                return NotFound(new ResponseDTO(404, "Request is not exist"));
+            }
+
+            AddQuestionRequest request = await _questionService.GetRequestAddQuestionBankDetail(addQuestionRequestId);
+            var requestResponse = _mapper.Map<RequestAddQuestionDetailResponse>(request);
+
+            if (_questionService.IsFinalExamBank(addQuestionRequestId))
+            {
+                requestResponse.IsFinalExamBank = true;
+            }
+            else
+            {
+                requestResponse.IsFinalExamBank = false;
+            }
+
+            return Ok(requestResponse);
         }
     }
 }
