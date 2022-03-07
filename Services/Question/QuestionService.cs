@@ -263,7 +263,8 @@ namespace examedu.Services
                                                 {
                                                     LevelName = q.Level.LevelName
                                                 },
-                                                Answers = q.Answers.ToList()
+                                                Answers = q.Answers.ToList(),
+                                                AddQuestionRequestId = q.AddQuestionRequestId
                                             }).ToList(),
                                             FEQuestions = r.FEQuestions.Select(q => new FEQuestion
                                             {
@@ -278,7 +279,8 @@ namespace examedu.Services
                                                 {
                                                     LevelName = q.Level.LevelName
                                                 },
-                                                FEAnswers = q.FEAnswers.ToList()
+                                                FEAnswers = q.FEAnswers.ToList(),
+                                                AddQuestionRequestId = q.AddQuestionRequestId
                                             }).ToList()
                                         })
                                         .FirstOrDefaultAsync();
