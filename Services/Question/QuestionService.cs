@@ -146,11 +146,13 @@ namespace examedu.Services
         /// <returns></returns>
         public async Task<Tuple<int, IEnumerable<AddQuestionRequest>>> GetAllRequestAddQuestionBank(PaginationParameter paginationParameter)
         {
+            string searchName = paginationParameter.SearchName;
+            searchName = searchName.Replace(":*|", " ").Replace(":*", "");
+
             IQueryable<AddQuestionRequest> requests = _dataContext.AddQuestionRequests;
             if (paginationParameter.SearchName != "")
             {
-                requests = requests.Where(r => EF.Functions.ToTsVector("simple", EF.Functions.Unaccent(r.Requester.Fullname.ToLower()))
-                      .Matches(EF.Functions.ToTsQuery("simple", EF.Functions.Unaccent(paginationParameter.SearchName.ToLower()))));
+                requests = requests.Where(r => r.Requester.Fullname.ToLower().Contains(searchName.ToLower()));
             }
 
             IEnumerable<AddQuestionRequest> requestList = await requests
@@ -327,11 +329,13 @@ namespace examedu.Services
         /// <returns></returns>
         public async Task<Tuple<int, IEnumerable<AddQuestionRequest>>> GetAllRequestAddQuestionByApproverId(int approverId, PaginationParameter paginationParameter)
         {
-            IQueryable<AddQuestionRequest> requests = _dataContext.AddQuestionRequests.Where(r=>r.ApproverId==approverId);
+            string searchName = paginationParameter.SearchName;
+            searchName = searchName.Replace(":*|", " ").Replace(":*", "");
+
+            IQueryable<AddQuestionRequest> requests = _dataContext.AddQuestionRequests.Where(r => r.ApproverId == approverId);
             if (paginationParameter.SearchName != "")
             {
-                requests = requests.Where(r => EF.Functions.ToTsVector("simple", EF.Functions.Unaccent(r.Requester.Fullname.ToLower()))
-                      .Matches(EF.Functions.ToTsQuery("simple", EF.Functions.Unaccent(paginationParameter.SearchName.ToLower()))));
+                requests = requests.Where(r => r.Requester.Fullname.ToUpper().Contains(searchName.ToUpper()));
             }
 
             IEnumerable<AddQuestionRequest> requestList = await requests
