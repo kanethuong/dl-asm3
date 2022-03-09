@@ -57,7 +57,7 @@ namespace ExamEdu.Services
                     examList.Add(exam);
                 }
             }
-
+            examList = examList.OrderByDescending(e => e.ExamDay).ToList();
             return Tuple.Create(examList.Count, examList.GetPage(paginationParameter));
         }
 
@@ -203,6 +203,10 @@ namespace ExamEdu.Services
                                 .FirstOrDefaultAsync();
         }
 
+        public StudentExamInfo GetStudentExamInfo(int studentId, int examId)
+        {
+            return _db.StudentExamInfos.Where(sei => sei.ExamId == examId && sei.StudentId == studentId).FirstOrDefault();
+        }
         public async Task<int> CreateExamPaperAuto(CreateExamAutoInput input)
         {
             decimal totalMCQMark = maxMark;
@@ -269,7 +273,7 @@ namespace ExamEdu.Services
                     foreach (var level in input.NumberOfMCQuestionByLevel)
                     {
                         List<int> randomList = ChooseRandomFromList.ChooseRandom<int>(
-                            await _db.Questions.Where(q => q.LevelId == level.Key && q.QuestionTypeId == 1&& q.isApproved == true)
+                            await _db.Questions.Where(q => q.LevelId == level.Key && q.QuestionTypeId == 1 && q.isApproved == true)
                             .Select(q => q.QuestionId).ToListAsync(), level.Value);
                         if (randomList == null)
                         {
@@ -288,7 +292,7 @@ namespace ExamEdu.Services
                     foreach (var level in input.NumberOfNonMCQuestionByLevel) // random nonMCQ
                     {
                         List<int> randomList = ChooseRandomFromList.ChooseRandom<int>(
-                            await _db.Questions.Where(q => q.LevelId == level.Key && q.QuestionTypeId != 1&& q.isApproved == true)
+                            await _db.Questions.Where(q => q.LevelId == level.Key && q.QuestionTypeId != 1 && q.isApproved == true)
                             .Select(q => q.QuestionId).ToListAsync(), level.Value);
                         if (randomList == null)
                         {
