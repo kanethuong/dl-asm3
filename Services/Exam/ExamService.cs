@@ -219,6 +219,10 @@ namespace ExamEdu.Services
             {
                 totalMCQuestion += level.Value;
             }
+            if (totalMCQuestion == 0)
+            {
+                totalMCQuestion++;
+            }
             decimal MCQMark = totalMCQMark / totalMCQuestion;
 
 
