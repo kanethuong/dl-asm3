@@ -8,6 +8,7 @@ using BackEnd.Helper.Authentication;
 using BackEnd.Helper.Email;
 using BackEnd.Helper.RefreshToken;
 using BackEnd.Services;
+using BackEnd.Services.Cache;
 using BackEnd.Services.ExamQuestions;
 using examedu.Services;
 using examedu.Services.Account;
@@ -30,6 +31,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.Newtonsoft;
 
 namespace ExamEdu
 {
@@ -99,8 +102,12 @@ namespace ExamEdu
             services.AddScoped<IExamQuestionsService, ExamQuestionsService>();
             services.AddScoped<IClassModuleService, ClassModuleService>();
             services.AddScoped<IClassService, ClassService>();
+            services.AddScoped<ICacheProvider,CacheProvider>();
 
             services.AddSignalR();
+
+            //Config redis for using signalR
+            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(Configuration.GetSection("Redis").Get<RedisConfiguration>());
 
             services.AddControllers().AddJsonOptions(options =>
             {
