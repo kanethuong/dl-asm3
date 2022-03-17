@@ -8,9 +8,9 @@ namespace BackEnd.Services.Cache
 {
     public class CacheProvider : ICacheProvider
     {
-        private readonly IRedisClient _cache;
+        private readonly IRedisCacheClient _cache;
 
-        public CacheProvider(IRedisClient cache)
+        public CacheProvider(IRedisCacheClient cache)
         {
             _cache = cache;
         }
