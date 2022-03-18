@@ -15,6 +15,7 @@ using examedu.Services.Account;
 using examedu.Services.Classes;
 using ExamEdu.DB;
 using ExamEdu.DTO;
+using ExamEdu.Helper.UploadDownloadFiles;
 using ExamEdu.Hubs;
 using ExamEdu.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -87,6 +88,14 @@ namespace ExamEdu
 
             // Add refresh token service
             services.AddSingleton<IRefreshToken, RefreshToken>();
+
+            // Config username and password Mega using
+            services.AddSingleton<IMegaHelper>(provider =>
+            {
+                string username = Configuration["Email:MailAddress"];
+                string password = Configuration["Email:MegaPassword"];
+                return new MegaHelper(username, password);
+            });
 
             // Map data from Model to DTO and back
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
