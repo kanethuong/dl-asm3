@@ -60,7 +60,7 @@ namespace BackEnd.Controllers
             }
             if (exam.ExamDay > DateTime.Now)
             {
-                return BadRequest(new ResponseDTO(400, "It is not time to do the exam"));
+                return BadRequest(new ResponseDTO(400, $"It is not time to do the exam. Now is {DateTime.Now}"));
             }
             bool isFinalExam = _examService.IsFinalExam(examId);
             int examCode = await _examQuestionsService.GetRandomExamCodeByExamId(examId, isFinalExam);
