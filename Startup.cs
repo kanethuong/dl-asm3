@@ -184,11 +184,11 @@ namespace ExamEdu
             //Get front-end url from appsettings.json
             var frontEndDevUrl = Configuration["FrontEndDevUrl"];
 
-            //Get front-end url from appsettings.json
-            // var frontEndUrl = Configuration["FrontEndUrl"];
+            // Get front-end url from appsettings.json
+            var frontEndUrl = Configuration["FrontEndUrl"];
 
             //CORS config for Front-end url
-            app.UseCors(options => options.WithOrigins(frontEndDevUrl)
+            app.UseCors(options => options.WithOrigins(frontEndDevUrl,frontEndUrl)
                                         .AllowAnyMethod()
                                         .AllowAnyHeader()
                                         .AllowCredentials());
