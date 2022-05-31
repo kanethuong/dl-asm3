@@ -68,6 +68,22 @@ namespace examedu.Controllers
             return Ok(new PaginationResponse<IEnumerable<ClassNameResponse>>(classes.Item1, classesResponse));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllClasses([FromQuery] PaginationParameter paginationParameter)
+        {
+            var classes = await _classService.GetAllClasses(paginationParameter);
+
+            if (classes.Item1 == 0)
+            {
+                return NotFound(new ResponseDTO(404, "No class found"));
+            }
+            //Map classes to ClassNameResponse
+            var classesResponse = _mapper.Map<IEnumerable<ClassNameResponse>>(classes.Item2);
+
+            //Return the classes in a pagination response
+            return Ok(new PaginationResponse<IEnumerable<ClassNameResponse>>(classes.Item1, classesResponse));
+        }
+
         [HttpGet("{classId:int}")]
         public async Task<IActionResult> GetClass(int classId)
         {
