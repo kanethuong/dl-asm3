@@ -11,5 +11,6 @@ namespace examedu.Services.Classes
     {
         Task<Tuple<int, IEnumerable<Class>>> GetClasses(int teacherId, int moduleId, PaginationParameter paginationParameter);
         Task<Tuple<int, IEnumerable<Class>>> GetAllClasses(PaginationParameter paginationParameter);
+        Task<bool> IsClassExist(string className);
     }
 }

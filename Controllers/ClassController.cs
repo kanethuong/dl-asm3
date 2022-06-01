@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using BackEnd.DTO.ClassDTO;
 using BackEnd.Services;
+using examedu.Services;
 using examedu.Services.Classes;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
@@ -25,16 +27,19 @@ namespace examedu.Controllers
         private readonly IMapper _mapper;
         private readonly IModuleService _moduleService;
         private readonly ITeacherService _teacherService;
+        private readonly IStudentService _studentService;
 
         public ClassController(IClassService classService,
                                IMapper mapper,
                                IModuleService moduleService,
-                               ITeacherService teacherService)
+                               ITeacherService teacherService,
+                               IStudentService studentService)
         {
             _classService = classService;
             _mapper = mapper;
             _moduleService = moduleService;
             _teacherService = teacherService;
+            _studentService = studentService;
         }
 
 
@@ -79,6 +84,42 @@ namespace examedu.Controllers
 
             //Return the classes in a pagination response
             return Ok(new PaginationResponse<IEnumerable<ClassNameResponse>>(classes.Item1, classesResponse));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> CreateNewClass([FromBody] CreateClassInput input)
+        {
+            if (await _classService.IsClassExist(input.ClassName))
+            {
+                return BadRequest(new ResponseDTO(400, "Class already exist"));
+            }
+
+            foreach (int studentId in input.StudentIds)
+            {
+                if (_studentService.CheckStudentExist(studentId) == false)
+                {
+                    return NotFound(new ResponseDTO(404, "Student not exist"));
+                }
+            }
+
+            foreach (var moduleTeacherId in input.ModuleTeacherIds)
+            {
+                if (await _teacherService.IsTeacherExist(moduleTeacherId.TeacherId) == false)
+                {
+                    return NotFound(new ResponseDTO(404, "Teacher not exist"));
+                }
+                if (_moduleService.IsModuleExist(moduleTeacherId.ModuleId) == false)
+                {
+                    return NotFound(new ResponseDTO(404, "Module not exist"));
+                }
+            }
+
+            if(input.StartDay > input.EndDay)
+            {
+                return BadRequest(new ResponseDTO(400, "Start day must be less than end day"));
+            }
+
+            
         }
     }
 }
