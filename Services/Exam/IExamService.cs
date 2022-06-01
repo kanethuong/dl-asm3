@@ -27,5 +27,7 @@ namespace ExamEdu.Services
         Task<byte[]> GenerateExamMarkReport(int examId, int classModuleId);
         Task<IEnumerable<StudentMarkResponse>> GetResultExamListByExamId(int examId);
         Task<int> UpdateExamRoom(int examId, string roomId);
+        
+        Task<int> UpdateExam(Exam exam);
     }
 }
