@@ -16,5 +16,7 @@ namespace examedu.Services.Classes
         //update Class
         Task<int> UpdateClassBasicInfor(Class classUpdated);
         Task<Tuple<int, IEnumerable<Class>>> GetAllClasses(PaginationParameter paginationParameter);
+        Task<bool> IsClassNameExist(string className);
+        Task<int> CreateNewClass(Class classInput);
     }
 }
