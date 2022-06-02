@@ -29,5 +29,6 @@ namespace ExamEdu.Services
         Task<int> UpdateExamRoom(int examId, string roomId);
         
         Task<int> UpdateExam(Exam exam);
+        Task<Tuple<int, IEnumerable<Exam>>> GetAllExam(PaginationParameter paginationParameter);
     }
 }
