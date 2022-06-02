@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 namespace examedu.Controllers
 {
     [ApiController]
-    // [Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     public class ClassController : ControllerBase
     {
@@ -180,6 +180,26 @@ namespace examedu.Controllers
 
             return Ok(classResponse);
 
+        }
+        
+        [HttpPut("update/basic_infor")]
+        public async Task<ActionResult> UpdateClassBasicInfor([FromBody] ClassBasicInforInput input)
+        {
+            if (await _classService.IsClassExist(input.ClassId) == false)
+            {
+                return BadRequest(new ResponseDTO(400, "Class not found"));
+            }
+
+            Class classUpdated = _mapper.Map<Class>(input);
+
+            int status = await _classService.UpdateClassBasicInfor(classUpdated);
+
+            if (status == 1)
+            {
+                return Ok(new ResponseDTO(200, "Class successfully updated"));
+            }
+
+            return BadRequest(new ResponseDTO(400, "Error when update class"));
         }
     }
 }

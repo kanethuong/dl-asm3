@@ -17,8 +17,8 @@ namespace ExamEdu.DTO.Profiles
             CreateMap<CreateClassInput, Class>()
                 .ForMember(dest => dest.ClassModules, opt => opt.MapFrom(src => src.ModuleTeacherStudentIds));
             CreateMap<ClassModule, ClassModuleResponse2>();
-            CreateMap<Class, ClassResponse>();
-
+            CreateMap<Class,ClassResponse>();
+            CreateMap<ClassBasicInforInput,Class>(); 
         }
     }
 }
