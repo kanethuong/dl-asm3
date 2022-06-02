@@ -69,5 +69,19 @@ namespace examedu.Services.Classes
         {
             return await _db.Classes.Where(s => s.ClassId == classId && s.DeactivatedAt == null).AnyAsync();
         }
+
+        public async Task<int> UpdateClassBasicInfor(Class classUpdated)
+        {
+            _db.Classes.Attach(classUpdated);
+            var entry = _db.Entry(classUpdated);
+
+            entry.Property(e => e.ClassName).IsModified = true;
+            entry.Property(e => e.StartDay).IsModified = true;
+            entry.Property(e => e.EndDay).IsModified = true;
+
+            int result = await _db.SaveChangesAsync();
+
+            return result;
+        }
     }
 }
