@@ -527,6 +527,13 @@ namespace ExamEdu.Services
             return result;
         }
 
+        public async Task<Exam> GetUpdateExam(int examId)
+        {
+            Exam exam = await _db.Exams.Where(c => c.ExamId == examId).FirstOrDefaultAsync();
+
+            return exam;
+        }
+
         public async Task<Tuple<int, IEnumerable<Exam>>> GetAllExam(PaginationParameter paginationParameter)
         {
             var queryResult = from e in _db.Exams
