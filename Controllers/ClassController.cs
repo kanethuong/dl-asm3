@@ -9,6 +9,7 @@ using examedu.Services.Classes;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
 using ExamEdu.DTO.ClassDTO;
+using ExamEdu.DTO.ClassModuleDTO;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -18,12 +19,13 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 namespace examedu.Controllers
 {
     [ApiController]
-    [Authorize]
+    // [Authorize]
     [Route("api/[controller]")]
     public class ClassController : ControllerBase
     {
 
         private readonly IClassService _classService;
+        private readonly IClassModuleService _classModuleService;
         private readonly IMapper _mapper;
         private readonly IModuleService _moduleService;
         private readonly ITeacherService _teacherService;
@@ -32,14 +34,16 @@ namespace examedu.Controllers
         public ClassController(IClassService classService,
                                IMapper mapper,
                                IModuleService moduleService,
+                               IStudentService studentService,
                                ITeacherService teacherService,
-                               IStudentService studentService)
+                               IClassModuleService classModuleService)
         {
             _classService = classService;
             _mapper = mapper;
             _moduleService = moduleService;
             _teacherService = teacherService;
             _studentService = studentService;
+            _classModuleService = classModuleService;
         }
 
 
@@ -86,23 +90,26 @@ namespace examedu.Controllers
             return Ok(new PaginationResponse<IEnumerable<ClassNameResponse>>(classes.Item1, classesResponse));
         }
 
-        [HttpPost]
+        [HttpPost("createClass")]
         public async Task<ActionResult> CreateNewClass([FromBody] CreateClassInput input)
         {
-            if (await _classService.IsClassExist(input.ClassName))
+            if (await _classService.IsClassNameExist(input.ClassName))
             {
                 return BadRequest(new ResponseDTO(400, "Class already exist"));
             }
 
-            foreach (int studentId in input.StudentIds)
+            foreach (var moduleTeacherStudentId in input.ModuleTeacherStudentIds)
             {
-                if (_studentService.CheckStudentExist(studentId) == false)
+                foreach (int studentId in moduleTeacherStudentId.StudentIds)
                 {
-                    return NotFound(new ResponseDTO(404, "Student not exist"));
+                    if (_studentService.CheckStudentExist(studentId) == false)
+                    {
+                        return NotFound(new ResponseDTO(404, "Student not exist"));
+                    }
                 }
             }
 
-            foreach (var moduleTeacherId in input.ModuleTeacherIds)
+            foreach (var moduleTeacherId in input.ModuleTeacherStudentIds)
             {
                 if (await _teacherService.IsTeacherExist(moduleTeacherId.TeacherId) == false)
                 {
@@ -114,12 +121,65 @@ namespace examedu.Controllers
                 }
             }
 
-            if(input.StartDay > input.EndDay)
+            if (input.StartDay > input.EndDay)
             {
                 return BadRequest(new ResponseDTO(400, "Start day must be less than end day"));
             }
 
-            
+            Class classInput = _mapper.Map<Class>(input);
+            int rs = await _classService.CreateNewClass(classInput);
+            if (rs == 0 || rs == -1)
+            {
+                return BadRequest(new ResponseDTO(400, "Failed to send request"));
+            }
+
+            return Created("", new ResponseDTO(201, "Create class successfully"));
+        }
+
+        [HttpGet("{classId:int}")]
+        public async Task<IActionResult> GetClass(int classId)
+        {
+            if (await _classService.IsClassExist(classId) == false)
+            {
+                return BadRequest(new ResponseDTO(400, "Class not found"));
+            }
+
+            //basic infor
+            Class basicInfor = await _classService.GetClassBasicInforById(classId);
+
+            //list class module
+            List<ClassModule> listClassModule = await _classModuleService.GetClassModuleList(classId);
+
+            basicInfor.ClassModules = listClassModule;
+
+            var ClassModulesList = new List<ClassModuleResponse2>();
+
+            foreach (var classModule in listClassModule)
+            {
+                ClassModulesList.Add(new ClassModuleResponse2
+                {
+                    ClassModuleId = classModule.ClassModuleId,
+                    ModuleCode = classModule.Module.ModuleCode,
+                    ModuleName = classModule.Module.ModuleName,
+                    TeacherName = classModule.Teacher.Fullname
+                });
+            }
+
+            ClassResponse classResponse = new ClassResponse()
+            {
+                ClassId = classId,
+                ClassName = basicInfor.ClassName,
+                CreatedAt = basicInfor.CreatedAt,
+                StartDay = basicInfor.StartDay,
+                EndDay = basicInfor.EndDay,
+                ClassModules = ClassModulesList
+            };
+
+
+            //var result = _mapper.Map<ClassResponse>(basicInfor);
+
+            return Ok(classResponse);
+
         }
     }
 }

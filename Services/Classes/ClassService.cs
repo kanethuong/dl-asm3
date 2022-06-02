@@ -7,6 +7,7 @@ using ExamEdu.DB.Models;
 using ExamEdu.DTO.PaginationDTO;
 using Microsoft.EntityFrameworkCore;
 using ExamEdu.Helper;
+using ExamEdu.DTO.ClassDTO;
 
 namespace examedu.Services.Classes
 {
@@ -18,6 +19,12 @@ namespace examedu.Services.Classes
         {
             _db = db;
         }
+
+        public async Task<Class> GetClassBasicInforById(int classId)
+        {
+            return await _db.Classes.Where(c => c.ClassId == classId).FirstOrDefaultAsync();
+        }
+
 
 
         /// <summary>
@@ -57,26 +64,29 @@ namespace examedu.Services.Classes
             return Tuple.Create(classes.Count, classes.GetPage(paginationParameter));
         }
 
-        public async Task<bool> IsClassExist(string className)
+        public async Task<bool> IsClassNameExist(string className)
         {
             return await _db.Classes.AnyAsync(c => c.ClassName.Equals(className) && c.DeactivatedAt == null);
         }
 
-        public async Task<(int, int)> CreateNewClass(Class classInput)
+        public async Task<int> CreateNewClass(Class classInput)
         {
             int rowInserted = 0;
-            int classId = 0;
             try
             {
                 _db.Classes.Add(classInput);
                 rowInserted = await _db.SaveChangesAsync();
-                classId = classInput.ClassId;
             }
             catch (Exception)
             {
                 rowInserted = -1;
             }
-            return (rowInserted, classId);
+            return rowInserted;
+        }
+
+        public async Task<bool> IsClassExist(int classId)
+        {
+            return await _db.Classes.Where(s => s.ClassId == classId && s.DeactivatedAt == null).AnyAsync();
         }
     }
 }
