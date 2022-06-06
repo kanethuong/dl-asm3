@@ -17,7 +17,7 @@ namespace ExamEdu.Services
         Task<int> CreateExamPaperAuto(CreateExamAutoInput input);
         Task<Exam> getExamById(int id);
         bool IsFinalExam(int examId);
-        Task<Tuple<int, IEnumerable<Exam>>> GetExamsByClassModuleId(int classModuleId, PaginationParameter paginationParameter);
+        Task<Tuple<int, IEnumerable<Exam>>> GetExamsByClassModuleId(int classModuleId, int moduleId, PaginationParameter paginationParameter);
 
         Task<Tuple<int, int>> CreateExamInfo(Exam exam);
 
@@ -29,5 +29,10 @@ namespace ExamEdu.Services
         Task<int> UpdateExamRoom(int examId, string roomId);
         
         Task<int> UpdateExam(Exam exam);
+        Task<Exam> GetUpdateExam(int examId);
+        Task<Tuple<int, IEnumerable<Exam>>> GetAllExam(PaginationParameter paginationParameter);
+        bool IsCancelled (int examId);
+        bool IsExist(int examId);
+        Task<int> CancelExam (int examId);
     }
 }
