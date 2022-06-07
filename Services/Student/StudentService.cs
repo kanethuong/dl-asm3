@@ -38,7 +38,7 @@ namespace examedu.Services
                 return null;
             }
 
-            List<StudentExamInfo> studentExamInforList = await _dataContext.StudentExamInfos.Where(s => s.StudentId == studentID 
+            List<StudentExamInfo> studentExamInforList = await _dataContext.StudentExamInfos.Where(s => s.StudentId == studentID
             && s.FinishAt != null).ToListAsync();
             if (studentExamInforList == null)
             {
@@ -138,6 +138,24 @@ namespace examedu.Services
             var students = await queryResult.ToListAsync();
 
             return Tuple.Create(students.Count, students.GetPage(paginationParameter));
+        }
+
+        public async Task<Tuple<int, IEnumerable<Student>>> GetAllStudents(PaginationParameter paginationParameter)
+        {
+            string searchName = paginationParameter.SearchName;
+            searchName = searchName.Replace(":*|", " ").Replace(":*", "");
+
+            IQueryable<Student> students = _dataContext.Students;
+            if (paginationParameter.SearchName != "")
+            {
+                students = students.Where(s => s.Fullname.ToLower().Contains(searchName.ToLower()));
+            }
+
+            IEnumerable<Student> studentList = await students
+                                                    .Where(s => s.DeactivatedAt == null)
+                                                    .OrderBy(s => s.Fullname)
+                                                    .ToListAsync();
+            return Tuple.Create(studentList.Count(), PaginationHelper.GetPage(studentList, paginationParameter));
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using BackEnd.DTO.StudentDTO;
 using BackEnd.Services;
 using examedu.DTO.StudentDTO;
 using examedu.Services;
@@ -16,7 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace examedu.Controllers
 {
     [ApiController]
-    [Authorize]
+    // [Authorize]
     [Route("api/[controller]")]
     public class StudentController : ControllerBase
     {
@@ -89,6 +90,19 @@ namespace examedu.Controllers
             }
             IEnumerable<StudentResponse> studentsResponses = _mapper.Map<IEnumerable<StudentResponse>>(students);
             return Ok(new PaginationResponse<IEnumerable<StudentResponse>>(totalRecord, studentsResponses));
+        }
+
+        //Get all students
+        [HttpGet]
+        public async Task<IActionResult> GetAllStudents([FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<Student> students) = await _studentService.GetAllStudents(paginationParameter);
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "No student found"));
+            }
+            IEnumerable<StudentInforResponse> studentsResponses = _mapper.Map<IEnumerable<StudentInforResponse>>(students);
+            return Ok(new PaginationResponse<IEnumerable<StudentInforResponse>>(totalRecord, studentsResponses));
         }
     }
 }
