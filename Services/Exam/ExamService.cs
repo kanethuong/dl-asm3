@@ -338,7 +338,7 @@ namespace ExamEdu.Services
             return _db.Exams.Where(e => e.ExamId == examId).Select(e => e.isFinalExam).FirstOrDefault();
         }
 
-        public async Task<Tuple<int, IEnumerable<Exam>>> GetExamsByClassModuleId(int classModuleId, PaginationParameter paginationParameter)
+        public async Task<Tuple<int, IEnumerable<Exam>>> GetExamsByClassModuleId(int classModuleId, int moduleId, PaginationParameter paginationParameter)
         {
             // var exams = from cm in _db.ClassModules
             //             join m in _db.Modules on cm.ModuleId equals m.ModuleId
@@ -357,7 +357,7 @@ namespace ExamEdu.Services
                         join s in _db.Students on cms.StudentId equals s.StudentId
                         join sei in _db.StudentExamInfos on s.StudentId equals sei.StudentId
                         join e in _db.Exams on sei.ExamId equals e.ExamId
-                        where cm.ClassModuleId == classModuleId
+                        where cm.ClassModuleId == classModuleId && e.ModuleId == moduleId
                         orderby e.ExamDay descending
                         select e;
 
@@ -503,6 +503,7 @@ namespace ExamEdu.Services
             entry.Property(e => e.ModuleId).IsModified = true;
             entry.Property(e => e.ProctorId).IsModified = true;
             entry.Property(e => e.SupervisorId).IsModified = true;
+            entry.Property(e => e.isFinalExam).IsModified = true;
 
             int result = await _db.SaveChangesAsync();
 
@@ -523,6 +524,66 @@ namespace ExamEdu.Services
                 return 0;
             }
             exam.Room = roomId;
+            int result = await _db.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Exam> GetUpdateExam(int examId)
+        {
+            Exam exam = await _db.Exams.Where(c => c.ExamId == examId).FirstOrDefaultAsync();
+
+            return exam;
+        }
+
+        public async Task<Tuple<int, IEnumerable<Exam>>> GetAllExam(PaginationParameter paginationParameter)
+        {
+            var queryResult = from e in _db.Exams
+                         join m in _db.Modules on e.ModuleId equals m.ModuleId
+                              orderby e.ExamDay descending
+                              select new Exam
+                         {
+                             ExamId = e.ExamId,
+                             ExamName = e.ExamName,
+                             ExamDay = e.ExamDay,
+                             Module = new Module
+                             {
+                                 ModuleId = e.ModuleId,
+                                 ModuleCode = m.ModuleCode,
+                                 ModuleName = m.ModuleName,
+                             },
+                         };
+
+            var exams = await queryResult.ToListAsync();
+
+            var totalCount = exams.Count;
+
+            return new Tuple<int, IEnumerable<Exam>>(totalCount, exams.GetPage(paginationParameter));
+        }
+
+        public bool IsCancelled(int examId)
+        {
+            return _db.Exams.Where(e => e.ExamId == examId && e.IsCancelled == true).Any();
+        }
+
+        public bool IsExist(int examId)
+        {
+            return  _db.Exams.Where(s => s.ExamId == examId && s.IsCancelled == false).Any();
+        }
+
+        public async Task<int> CancelExam(int examId)
+        {
+            var examFound = await _db.Exams.Where(e => e.ExamId == examId).FirstOrDefaultAsync();
+            
+            if (examFound == null)
+            {
+                return 0;
+            }
+            //check if the exam is over or in the future
+            if (examFound.ExamDay.CompareTo(DateTime.Now) < 0)
+            {
+                return -1;
+            }
+            examFound.IsCancelled = true;
             int result = await _db.SaveChangesAsync();
             return result;
         }
