@@ -493,7 +493,7 @@ namespace ExamEdu.Services
         {
             _db.Exams.Attach(exam);
             var entry = _db.Entry(exam);
-            
+
             entry.Property(e => e.ExamName).IsModified = true;
             entry.Property(e => e.ExamDay).IsModified = true;
             entry.Property(e => e.DurationInMinute).IsModified = true;
@@ -519,7 +519,7 @@ namespace ExamEdu.Services
         public async Task<int> UpdateExamRoom(int examId, string roomId)
         {
             var exam = await _db.Exams.Where(c => c.ExamId == examId).FirstOrDefaultAsync();
-            if(exam == null)
+            if (exam == null)
             {
                 return 0;
             }
@@ -538,20 +538,20 @@ namespace ExamEdu.Services
         public async Task<Tuple<int, IEnumerable<Exam>>> GetAllExam(PaginationParameter paginationParameter)
         {
             var queryResult = from e in _db.Exams
-                         join m in _db.Modules on e.ModuleId equals m.ModuleId
+                              join m in _db.Modules on e.ModuleId equals m.ModuleId
                               orderby e.ExamDay descending
                               select new Exam
-                         {
-                             ExamId = e.ExamId,
-                             ExamName = e.ExamName,
-                             ExamDay = e.ExamDay,
-                             Module = new Module
-                             {
-                                 ModuleId = e.ModuleId,
-                                 ModuleCode = m.ModuleCode,
-                                 ModuleName = m.ModuleName,
-                             },
-                         };
+                              {
+                                  ExamId = e.ExamId,
+                                  ExamName = e.ExamName,
+                                  ExamDay = e.ExamDay,
+                                  Module = new Module
+                                  {
+                                      ModuleId = e.ModuleId,
+                                      ModuleCode = m.ModuleCode,
+                                      ModuleName = m.ModuleName,
+                                  },
+                              };
 
             var exams = await queryResult.ToListAsync();
 
@@ -567,13 +567,13 @@ namespace ExamEdu.Services
 
         public bool IsExist(int examId)
         {
-            return  _db.Exams.Where(s => s.ExamId == examId && s.IsCancelled == false).Any();
+            return _db.Exams.Where(s => s.ExamId == examId && s.IsCancelled == false).Any();
         }
 
         public async Task<int> CancelExam(int examId)
         {
             var examFound = await _db.Exams.Where(e => e.ExamId == examId).FirstOrDefaultAsync();
-            
+
             if (examFound == null)
             {
                 return 0;
@@ -586,6 +586,26 @@ namespace ExamEdu.Services
             examFound.IsCancelled = true;
             int result = await _db.SaveChangesAsync();
             return result;
+        }
+
+        public async Task<Exam> GetExamDetailByExamId(int examId)
+        {
+            return await _db.Exams.Where(e => e.ExamId == examId)
+                            .Select(e => new Exam
+                            {
+                                ExamName = e.ExamName,
+                                Module = e.Module,
+                                Description = e.Description,
+                                Password = e.Password,
+                                ExamDay = e.ExamDay,
+                                CreatedAt = e.CreatedAt,
+                                DurationInMinute = e.DurationInMinute,
+                                Room = e.Room,
+                                isFinalExam = e.isFinalExam,
+                                IsCancelled = e.IsCancelled,
+                                Proctor=e.Proctor,
+                                Supervisor=e.Supervisor,
+                            }).FirstOrDefaultAsync();
         }
     }
 }

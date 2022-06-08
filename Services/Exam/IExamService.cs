@@ -27,12 +27,13 @@ namespace ExamEdu.Services
         Task<byte[]> GenerateExamMarkReport(int examId, int classModuleId);
         Task<IEnumerable<StudentMarkResponse>> GetResultExamListByExamId(int examId);
         Task<int> UpdateExamRoom(int examId, string roomId);
-        
+
         Task<int> UpdateExam(Exam exam);
         Task<Exam> GetUpdateExam(int examId);
         Task<Tuple<int, IEnumerable<Exam>>> GetAllExam(PaginationParameter paginationParameter);
-        bool IsCancelled (int examId);
+        bool IsCancelled(int examId);
         bool IsExist(int examId);
-        Task<int> CancelExam (int examId);
+        Task<int> CancelExam(int examId);
+        Task<Exam> GetExamDetailByExamId(int examId);
     }
 }
