@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using BackEnd.DTO.ExamDTO;
 using BackEnd.Services;
 using examedu.DTO.ExamDTO;
 using examedu.DTO.StudentDTO;
@@ -18,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExamEdu.Controllers
 {
     [ApiController]
-    [Authorize]
+    // [Authorize]
     [Route("api/[controller]")]
     public class ExamController : ControllerBase
     {
@@ -190,7 +191,8 @@ namespace ExamEdu.Controllers
         public async Task<ActionResult> ExportExamMarkReport(int examId, int classModuleId)
         {
             var studentListMark = await _examService.GetResultExamListByExamId(examId);
-            if (studentListMark.Count() == 0) {
+            if (studentListMark.Count() == 0)
+            {
                 return NotFound(new ResponseDTO(404, "There is no student taking this exam "));
             }
             var stream = await _examService.GenerateExamMarkReport(examId, classModuleId);
@@ -253,12 +255,23 @@ namespace ExamEdu.Controllers
             {
                 return Ok(new ResponseDTO(200, "Exam successfully cancelled"));
             }
-            else if(status == -1)
+            else if (status == -1)
             {
                 return NotFound(new ResponseDTO(404, "This exam is already done"));
             }
             return BadRequest(new ResponseDTO(400, "Error when cancel exam"));
 
+        }
+
+        [HttpGet("examDetail/{examId:int}")]
+        public async Task<IActionResult> GetExamDetailById(int examId)
+        {
+            var exam = await _examService.GetExamDetailByExamId(examId);
+            if (exam == null)
+            {
+                return NotFound(new ResponseDTO(404, "Exam not found"));
+            }
+            return Ok(_mapper.Map<ExamDetailResponse>(exam));
         }
     }
 }
