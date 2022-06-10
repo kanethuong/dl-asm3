@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using BackEnd.DTO.StudentDTO;
 using BackEnd.Services;
 using examedu.DTO.StudentDTO;
 using examedu.Services;
@@ -16,7 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace examedu.Controllers
 {
     [ApiController]
-    [Authorize]
+    // [Authorize]
     [Route("api/[controller]")]
     public class StudentController : ControllerBase
     {
@@ -78,6 +79,24 @@ namespace examedu.Controllers
             return Ok(new PaginationResponse<IEnumerable<StudentResponse>>(totalRecord, studentsResponses));
         }
 
+        [HttpGet("list/{moduleId:int}")]
+        public async Task<IActionResult> GetAllStudents(int moduleId, [FromQuery] PaginationParameter paginationParameter)
+        {
+            //If module does not exist return bad request
+            if (await _moduleService.getModuleByID(moduleId) is null)
+            {
+                return BadRequest(new ResponseDTO(400, "Module does not exist"));
+            }
+
+            (int totalRecord, IEnumerable<Student> students) = await _studentService.GetAllStudents(moduleId, paginationParameter);
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "No student found"));
+            }
+            IEnumerable<StudentResponse> studentsResponses = _mapper.Map<IEnumerable<StudentResponse>>(students);
+            return Ok(new PaginationResponse<IEnumerable<StudentResponse>>(totalRecord, studentsResponses));
+        }
+
         [HttpGet("{classModuleId:int}")]
         public async Task<IActionResult> GetStudents(int classModuleId, [FromQuery] PaginationParameter paginationParameter)
         {
@@ -90,6 +109,20 @@ namespace examedu.Controllers
             IEnumerable<StudentResponse> studentsResponses = _mapper.Map<IEnumerable<StudentResponse>>(students);
             return Ok(new PaginationResponse<IEnumerable<StudentResponse>>(totalRecord, studentsResponses));
         }
+
+        //Get all students
+        [HttpGet]
+        public async Task<IActionResult> GetAllStudents([FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<Student> students) = await _studentService.GetAllStudents(paginationParameter);
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "No student found"));
+            }
+            IEnumerable<StudentInforResponse> studentsResponses = _mapper.Map<IEnumerable<StudentInforResponse>>(students);
+            return Ok(new PaginationResponse<IEnumerable<StudentInforResponse>>(totalRecord, studentsResponses));
+        }
+        
         /// <summary>
         /// Get student list not in classModule (to add student to classModule)
         /// </summary>
@@ -97,12 +130,9 @@ namespace examedu.Controllers
         /// <param name="paginationParameter"></param>
         /// <returns></returns>
         [HttpGet("class/{classId:int}/module/{moduleId:int}/free")]
-        public async Task<IActionResult> GetStudentsNotInClassModule(int classId,int moduleId, [FromQuery] PaginationParameter paginationParameter){
-            (int totalRecord, IEnumerable<Student> students) = await _studentService.GetStudentsNotInClassModule( classId, moduleId, paginationParameter);
-            if (totalRecord == 0)
-            {
-                return NotFound(new ResponseDTO(404, "No student found"));
-            }
+        public async Task<IActionResult> GetStudentsNotInClassModule(int classId, int moduleId, [FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<Student> students) = await _studentService.GetStudentsNotInClassModule(classId, moduleId, paginationParameter);
             IEnumerable<StudentResponse> studentsResponses = _mapper.Map<IEnumerable<StudentResponse>>(students);
             return Ok(new PaginationResponse<IEnumerable<StudentResponse>>(totalRecord, studentsResponses));
         }

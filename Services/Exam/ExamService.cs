@@ -339,7 +339,7 @@ namespace ExamEdu.Services
             return _db.Exams.Where(e => e.ExamId == examId).Select(e => e.isFinalExam).FirstOrDefault();
         }
 
-        public async Task<Tuple<int, IEnumerable<Exam>>> GetExamsByClassModuleId(int classModuleId, int moduleId, PaginationParameter paginationParameter)
+        public Tuple<int, IEnumerable<Exam>> GetExamsByClassModuleId(int classModuleId, int moduleId, PaginationParameter paginationParameter)
         {
             var exams = from cm in _db.ClassModules
                         join cms in _db.Class_Module_Students on cm.ClassModuleId equals cms.ClassModuleId
@@ -558,7 +558,7 @@ namespace ExamEdu.Services
         {
             return _db.Exams.Where(s => s.ExamId == examId && s.IsCancelled == false).Any();
         }
-
+            
         public async Task<int> CancelExam(int examId)
         {
             var examFound = await _db.Exams.Where(e => e.ExamId == examId).FirstOrDefaultAsync();
@@ -685,6 +685,26 @@ namespace ExamEdu.Services
                 }
                 return await package.GetAsByteArrayAsync();
             }
+
+        }
+        public async Task<Exam> GetExamDetailByExamId(int examId)
+        {
+            return await _db.Exams.Where(e => e.ExamId == examId)
+                            .Select(e => new Exam
+                            {
+                                ExamName = e.ExamName,
+                                Module = e.Module,
+                                Description = e.Description,
+                                Password = e.Password,
+                                ExamDay = e.ExamDay,
+                                CreatedAt = e.CreatedAt,
+                                DurationInMinute = e.DurationInMinute,
+                                Room = e.Room,
+                                isFinalExam = e.isFinalExam,
+                                IsCancelled = e.IsCancelled,
+                                Proctor = e.Proctor,
+                                Supervisor = e.Supervisor,
+                            }).FirstOrDefaultAsync();
         }
     }
 }
