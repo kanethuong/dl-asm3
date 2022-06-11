@@ -113,9 +113,9 @@ namespace ExamEdu.Controllers
         }
 
         [HttpGet("progressExam/{classModuleId:int}/{moduleId:int}")]
-        public async Task<IActionResult> GetProgressExam(int classModuleId, int moduleId, [FromQuery] PaginationParameter paginationParameter)
+        public IActionResult GetProgressExam(int classModuleId, int moduleId, [FromQuery] PaginationParameter paginationParameter)
         {
-            (int totalRecord, IEnumerable<Exam> progressExams) = await _examService.GetExamsByClassModuleId(classModuleId, moduleId, paginationParameter);
+            (int totalRecord, IEnumerable<Exam> progressExams) =_examService.GetExamsByClassModuleId(classModuleId, moduleId, paginationParameter);
             if (totalRecord == 0)
             {
                 return NotFound(new ResponseDTO(404, "Exam not found"));
@@ -261,6 +261,18 @@ namespace ExamEdu.Controllers
             }
             return BadRequest(new ResponseDTO(400, "Error when cancel exam"));
 
+        }
+        [HttpGet("report/{classModuleId:int}/{moduleId:int}")]
+        public async Task<IActionResult> ExportModuleProgressTest(int classModuleId, int moduleId)
+        {
+
+            var rp = await _examService.GetAllExamResultByClassModuleId(classModuleId, moduleId);
+            if (rp.Count() == 0)
+            {
+                return NotFound(new ResponseDTO(404, "There is no exam in this module"));
+            }
+            var stream = await _examService.GenerateModuleProgressExamReport(classModuleId, moduleId);
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Report.xlsx");
         }
 
         [HttpGet("examDetail/{examId:int}")]
