@@ -567,11 +567,7 @@ namespace ExamEdu.Services
 
         public bool IsExist(int examId)
         {
-<<<<<<< HEAD
             return  _db.Exams.Where(s => s.ExamId == examId).Any();
-=======
-            return _db.Exams.Where(s => s.ExamId == examId && s.IsCancelled == false).Any();
->>>>>>> 5e2de4da7fec47427aefc51b53affe143a4f93fa
         }
 
         public async Task<int> CancelExam(int examId)
