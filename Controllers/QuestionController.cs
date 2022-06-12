@@ -10,8 +10,11 @@ using examedu.Services;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
 using ExamEdu.DTO.PaginationDTO;
+using ExamEdu.DTO.QuestionDTO;
+using ExamEdu.Helper.UploadDownloadFiles;
 using ExamEdu.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace examedu.Controllers
@@ -26,18 +29,20 @@ namespace examedu.Controllers
         private readonly ILevelService _levelService;
         private readonly ITeacherService _teacherService;
         private readonly IMapper _mapper;
-
+        private readonly IImgHelper _imgHelper;
         public QuestionController(IQuestionService questionService,
                                   IModuleService moduleService,
                                   ILevelService levelService,
                                   ITeacherService teacherService,
-                                  IMapper mapper)
+                                  IMapper mapper,
+                                  IImgHelper imgHelper)
         {
             _moduleService = moduleService;
             _levelService = levelService;
             _questionService = questionService;
             _teacherService = teacherService;
             _mapper = mapper;
+            _imgHelper = imgHelper;
         }
 
         [HttpGet("{moduleID:int}/{levelID:int}/{isFinalExam:bool}")]
@@ -252,6 +257,43 @@ namespace examedu.Controllers
                 }
             }
             return Ok(new PaginationResponse<IEnumerable<RequestAddQuestionListByApproverResponse>>(totalRecord, requestResponse));
+        }
+
+        [HttpPost("images")]
+        public async Task<ActionResult> UploadImage([FromForm] QuestionImageInputList imageInputsList)
+        {
+            if (imageInputsList.imageInputs == null)
+            {
+                return BadRequest(new ResponseDTO(400, "ImageList is null"));
+            }
+            var listImageUrl = new List<QuestionImageResponse>();
+            
+            foreach (var input in imageInputsList.imageInputs)
+            {
+                if (input.image == null)
+                {
+                    return BadRequest(new ResponseDTO(400, "Image is null"));
+                }
+                if (input.image.Length == 0)
+                {
+                    return BadRequest(new ResponseDTO(400, "Image is empty"));
+                }
+                if (input.image.Length > 1048576)
+                {
+                    return BadRequest(new ResponseDTO(400, "Image is too large"));
+                }
+                if (input.image.FileName.Split('.').Last() != "png" && input.image.FileName.Split('.').Last() != "jpg" && input.image.FileName.Split('.').Last() != "jpeg")
+                {
+                    return BadRequest(new ResponseDTO(400, "Image is not valid"));
+                }
+                string url = await _imgHelper.Upload(input.image);
+                listImageUrl.Add(new QuestionImageResponse
+                {
+                    index = input.index,
+                    imageUrl = url
+                });
+            }
+            return Ok(listImageUrl);
         }
     }
 }

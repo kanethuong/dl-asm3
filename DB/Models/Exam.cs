@@ -44,6 +44,6 @@ namespace ExamEdu.DB.Models
 
         public ICollection<FEQuestion> FEQuestions { get; set; }
         public ICollection<Exam_FEQuestion> Exam_FEQuestions { get; set; }
-        public ICollection<StudentError> StudentErrors { get; set; }
+        public ICollection<StudentCheating> StudentCheatings { get; set; }
     }
 }

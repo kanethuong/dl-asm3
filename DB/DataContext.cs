@@ -317,20 +317,20 @@ namespace ExamEdu.DB
                .OnDelete(DeleteBehavior.SetNull);
  
             // Connect StudentError to ErrorType
-            modelBuilder.Entity<ErrorType>()
-               .HasMany(r => r.StudentErrors)
-               .WithOne(a => a.ErrorType)
-               .HasForeignKey(a => a.ErrorTypeId)
+            modelBuilder.Entity<CheatingType>()
+               .HasMany(r => r.StudentCheatings)
+               .WithOne(a => a.CheatingType)
+               .HasForeignKey(a => a.CheatingTypeId)
                .OnDelete(DeleteBehavior.SetNull);
-            // Connect StudentError to Student
+            // Connect StudentCheating to Student
             modelBuilder.Entity<Student>()
-                .HasMany<StudentError>(s => s.StudentErrors)
+                .HasMany<StudentCheating>(s => s.StudentCheatings)
                 .WithOne(se => se.Student)
                 .HasForeignKey(se => se.StudentId)
                 .OnDelete(DeleteBehavior.SetNull);
-            // Connect StudentError to Exam
+            // Connect StudentCheating to Exam
             modelBuilder.Entity<Exam>()
-                .HasMany<StudentError>(s => s.StudentErrors)
+                .HasMany<StudentCheating>(s => s.StudentCheatings)
                 .WithOne(se => se.Exam)
                 .HasForeignKey(se => se.ExamId)
                 .OnDelete(DeleteBehavior.SetNull);    
