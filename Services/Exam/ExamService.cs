@@ -9,6 +9,7 @@ using examedu.Helper.RandomGenerator;
 using ExamEdu.DB;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO.ExamDTO;
+using ExamEdu.DTO.MarkDTO;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Helper;
 using ExamEdu.Helper.UploadDownloadFiles;
@@ -338,20 +339,8 @@ namespace ExamEdu.Services
             return _db.Exams.Where(e => e.ExamId == examId).Select(e => e.isFinalExam).FirstOrDefault();
         }
 
-        public async Task<Tuple<int, IEnumerable<Exam>>> GetExamsByClassModuleId(int classModuleId, int moduleId, PaginationParameter paginationParameter)
+        public Tuple<int, IEnumerable<Exam>> GetExamsByClassModuleId(int classModuleId, int moduleId, PaginationParameter paginationParameter)
         {
-            // var exams = from cm in _db.ClassModules
-            //             join m in _db.Modules on cm.ModuleId equals m.ModuleId
-            //             join e in _db.Exams on m.ModuleId equals e.ModuleId
-            //             where cm.ClassModuleId == classModuleId
-            //             select e;
-
-            // var exams = await _db.ClassModules.Join(_db.Modules, cm => cm.ModuleId, m => m.ModuleId, (cm, m) => new { cm, m })
-            //             .Join(_db.Exams, x => x.m.ModuleId, e => e.ModuleId, (x, e) => new { x, e })
-            //             .Where(y => y.x.cm.ClassModuleId == classModuleId)
-            //             .OrderBy(y => y.e.ExamDay)
-            //             .Select(y => y.e).ToListAsync();
-
             var exams = from cm in _db.ClassModules
                         join cms in _db.Class_Module_Students on cm.ClassModuleId equals cms.ClassModuleId
                         join s in _db.Students on cms.StudentId equals s.StudentId
