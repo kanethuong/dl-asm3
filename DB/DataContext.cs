@@ -32,6 +32,8 @@ namespace ExamEdu.DB
         public DbSet<StudentAnswer> StudentAnswers { get; set; }
         public DbSet<StudentFEAnswer> StudentFEAnswers { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
+        public DbSet<StudentCheating> StudentCheatings { get; set; }
+        public DbSet<CheatingType> CheatingTypes { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
