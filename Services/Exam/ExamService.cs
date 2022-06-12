@@ -556,9 +556,9 @@ namespace ExamEdu.Services
 
         public bool IsExist(int examId)
         {
-            return  _db.Exams.Where(s => s.ExamId == examId).Any();
+            return _db.Exams.Where(s => s.ExamId == examId && s.IsCancelled == false).Any();
         }
-
+            
         public async Task<int> CancelExam(int examId)
         {
             var examFound = await _db.Exams.Where(e => e.ExamId == examId).FirstOrDefaultAsync();
@@ -577,6 +577,116 @@ namespace ExamEdu.Services
             return result;
         }
 
+        public async Task<IEnumerable<Student>> GetStudents(int classModuleId)
+        {
+            var queryResult = from student in _db.Students
+                              join cms in _db.Class_Module_Students on student.StudentId equals cms.StudentId
+                              where cms.ClassModuleId == classModuleId && student.DeactivatedAt == null
+                              orderby student.StudentId ascending
+                              select new Student
+                              {
+                                  StudentId = student.StudentId,
+                                  Fullname = student.Fullname
+                              };
+            var students = await queryResult.ToListAsync();
+
+            return students; ;
+        }
+
+        // Get all exam by classModuleId and moduleId include exam result
+        public async Task<IEnumerable<ProgressExamReport>> GetAllExamResultByClassModuleId(int classModuleId, int moduleId)
+        {
+            var examsGet = from cm in _db.ClassModules
+                           join cms in _db.Class_Module_Students on cm.ClassModuleId equals cms.ClassModuleId
+                           join s in _db.Students on cms.StudentId equals s.StudentId
+                           join sei in _db.StudentExamInfos on s.StudentId equals sei.StudentId
+                           join e in _db.Exams on sei.ExamId equals e.ExamId
+                           where cm.ClassModuleId == classModuleId && e.ModuleId == moduleId && e.isFinalExam == false
+                           orderby e.ExamId descending
+                           select new ProgressExamReport
+                           {
+                               ExamId = e.ExamId,
+                               ExamName = e.ExamName,
+                               StudentMark = new List<StudentProgressResult>()
+                           };
+            var exams = examsGet.Distinct().ToList();
+            var students = await this.GetStudents(classModuleId);
+            foreach (var e in exams)
+            {
+                foreach (var st in students)
+                {
+                    var examResult = await _db.StudentExamInfos.Join(_db.Students,
+                                                                     sei => sei.StudentId,
+                                                                     s => s.StudentId,
+                                                                     (sei, s) => new { sei, s })
+                                                                     .Where(x => x.sei.StudentId == st.StudentId
+                                                                             && x.sei.ExamId == e.ExamId)
+                                                                     .Select(x => new StudentProgressResult
+                                                                     {
+                                                                         StudentId = x.sei.StudentId,
+                                                                         StudentName = x.s.Fullname,
+                                                                         Mark = x.sei.Mark
+                                                                     })
+                                                                    .FirstOrDefaultAsync();
+                    if (examResult == null)
+                    {
+                        e.StudentMark.Add(new StudentProgressResult
+                        {
+                            StudentId = st.StudentId,
+                            StudentName = st.Fullname,
+                            Mark = null
+                        });
+                    }
+                    else
+                    {
+                        e.StudentMark.Add(examResult);
+                    }
+                }
+            }
+            return exams;
+        }
+        public async Task<byte[]> GenerateModuleProgressExamReport(int classModuleId, int moduleId)
+        {
+            var classModules = await this.GetClassModuleInfo(classModuleId);
+            var students = await this.GetStudents(classModuleId);
+            var examsWithResult = await this.GetAllExamResultByClassModuleId(classModuleId, moduleId);
+            // using var stream = File.OpenRead(pathToTest);
+            using var stream = await _megaHelper.Download(new Uri("https://mega.nz/file/Lh0HGaYL#eHVmZPVAUNN6eD3WfquteM0CmK4DELbhR5QthJTbTvU"));
+            using (var package = new ExcelPackage())
+            {
+                await package.LoadAsync(stream);
+                var moduleProgressExam = package.Workbook.Worksheets[0];
+
+                moduleProgressExam.Cells["A2"].Value = classModules.Class.ClassName;
+                moduleProgressExam.Cells["A3"].Value = $"{classModules.Module.ModuleCode} - {classModules.Module.ModuleName}";
+
+                var studentsFill = moduleProgressExam.Cells[$"A6:B{students.Count() + 6}"];
+                studentsFill.FillDataToCells(students, (markInfo, cells) =>
+                {
+                    cells[0].Value = markInfo.StudentId;
+                    cells[1].Value = markInfo.Fullname;
+                });
+
+                // Get ra từng column để điền exam vào, sau đó moveRight để điền tiếp exam tiếp theo
+                var examResultFill = moduleProgressExam.Cells[$"C5:C{students.Count() + 5}"];
+                // loop qua list exam để fill data
+                foreach (var exam in examsWithResult)
+                {
+                    //Set exam name in the first row (header exam)
+                    examResultFill.SetCellValue(0, 0, exam.ExamName);
+                    // với mỗi exam, loop qua danh sách student để fill data
+                    foreach (var (item, index) in exam.StudentMark.Select((value, i) => (value, i)))
+                    {
+                        // fill data của từng student mark
+                        // index +1 vì đã điền exam name ở ô đầu tiên
+                        examResultFill.SetCellValue(index + 1, 0, item.Mark);
+                    }
+                    examResultFill = examResultFill.MoveRight(1);
+                }
+                return await package.GetAsByteArrayAsync();
+            }
+
+        }
         public async Task<Exam> GetExamDetailByExamId(int examId)
         {
             return await _db.Exams.Where(e => e.ExamId == examId)
@@ -592,8 +702,8 @@ namespace ExamEdu.Services
                                 Room = e.Room,
                                 isFinalExam = e.isFinalExam,
                                 IsCancelled = e.IsCancelled,
-                                Proctor=e.Proctor,
-                                Supervisor=e.Supervisor,
+                                Proctor = e.Proctor,
+                                Supervisor = e.Supervisor,
                             }).FirstOrDefaultAsync();
         }
     }
