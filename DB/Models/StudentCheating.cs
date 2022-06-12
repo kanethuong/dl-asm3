@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace ExamEdu.DB.Models
 {
-    public class StudentError
+    public class StudentCheating
     {
-        public int StudentErrorId { get; set; }
+        public int StudentCheatingId { get; set; }
         public int ExamId { get; set; }
         public Exam Exam { get; set; }
         
@@ -16,7 +16,7 @@ namespace ExamEdu.DB.Models
         public DateTime Time { get; set; }
         public string Comment { get; set; }
         public bool IsComfirmed { get; set; }=false;
-        public int ErrorTypeId { get; set; }
-        public ErrorType ErrorType { get; set; }
+        public int CheatingTypeId { get; set; }
+        public CheatingType CheatingType { get; set; }
     }
 }

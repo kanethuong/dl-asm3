@@ -114,6 +114,7 @@ namespace ExamEdu
             services.AddScoped<ICacheProvider,CacheProvider>();
             services.AddScoped<IAcademicDepartmentService, AcademicDepartmentService>();
             services.AddScoped<IAdministratorService,AdministratorService>();
+            services.AddScoped<IImgHelper, ImgHelper>();
 
             services.AddSignalR();
 
