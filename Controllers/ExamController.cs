@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExamEdu.Controllers
 {
     [ApiController]
-    // [Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     public class ExamController : ControllerBase
     {
