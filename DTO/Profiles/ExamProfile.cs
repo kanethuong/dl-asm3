@@ -40,6 +40,10 @@ namespace ExamEdu.DTO.Profiles
                 .ForMember(dest => dest.ProctorEmail, opt => opt.MapFrom(s => s.Proctor.Email))
                 .ForMember(dest => dest.ProctorFullName, opt => opt.MapFrom(s => s.Proctor.Fullname))
                 .ForMember(dest => dest.SupervisorEmail, opt => opt.MapFrom(s => s.Supervisor.Email));
+            CreateMap<Exam,ExamProctorResponse>()
+                .ForMember(dest => dest.ModuleCode, opt => opt.MapFrom(s => s.Module.ModuleCode))
+                .ForMember(dest => dest.ModuleName, opt => opt.MapFrom(s => s.Module.ModuleName))
+                .ForMember(dest => dest.SupervisorEmail, opt => opt.MapFrom(s => s.Supervisor.Email));
         }
 
     }

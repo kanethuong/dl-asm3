@@ -33,9 +33,10 @@ namespace ExamEdu.Services
         Task<Tuple<int, IEnumerable<Exam>>> GetAllExam(PaginationParameter paginationParameter);
         bool IsCancelled(int examId);
         bool IsExist(int examId);
-        Task<int> CancelExam (int examId);
+        Task<int> CancelExam(int examId);
         Task<IEnumerable<ProgressExamReport>> GetAllExamResultByClassModuleId(int classModuleId, int moduleId);
         Task<byte[]> GenerateModuleProgressExamReport(int classModuleId, int moduleId);
         Task<Exam> GetExamDetailByExamId(int examId);
+        Task<Tuple<int, IEnumerable<Exam>>> GetExamByProctorId(int proctorId, PaginationParameter paginationParameter);
     }
 }
