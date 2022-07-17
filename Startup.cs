@@ -12,6 +12,7 @@ using BackEnd.Services.Cache;
 using BackEnd.Services.ExamQuestions;
 using examedu.Services;
 using examedu.Services.Account;
+using examedu.Services.Cheat;
 using examedu.Services.Classes;
 using ExamEdu.DB;
 using ExamEdu.DTO;
@@ -115,6 +116,7 @@ namespace ExamEdu
             services.AddScoped<IAcademicDepartmentService, AcademicDepartmentService>();
             services.AddScoped<IAdministratorService,AdministratorService>();
             services.AddScoped<IImgHelper, ImgHelper>();
+            services.AddScoped<ICheatService, CheatService>();
 
             services.AddSignalR();
 
