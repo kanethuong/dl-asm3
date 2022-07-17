@@ -115,7 +115,7 @@ namespace ExamEdu.Controllers
         [HttpGet("progressExam/{classModuleId:int}/{moduleId:int}")]
         public IActionResult GetProgressExam(int classModuleId, int moduleId, [FromQuery] PaginationParameter paginationParameter)
         {
-            (int totalRecord, IEnumerable<Exam> progressExams) =_examService.GetExamsByClassModuleId(classModuleId, moduleId, paginationParameter);
+            (int totalRecord, IEnumerable<Exam> progressExams) = _examService.GetExamsByClassModuleId(classModuleId, moduleId, paginationParameter);
             if (totalRecord == 0)
             {
                 return NotFound(new ResponseDTO(404, "Exam not found"));
@@ -284,6 +284,19 @@ namespace ExamEdu.Controllers
                 return NotFound(new ResponseDTO(404, "Exam not found"));
             }
             return Ok(_mapper.Map<ExamDetailResponse>(exam));
+        }
+
+        [HttpGet("examProctor/{proctorId:int}")]
+        public async Task<IActionResult> GetExamByProctorId(int proctorId, [FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<Exam> examList) = await _examService.GetExamByProctorId(proctorId, paginationParameter);
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "Exam not found"));
+            }
+            IEnumerable<ExamProctorResponse> examListResponse = _mapper.Map<IEnumerable<ExamProctorResponse>>(examList);
+
+            return Ok(new PaginationResponse<IEnumerable<ExamProctorResponse>>(totalRecord, examListResponse));
         }
     }
 }

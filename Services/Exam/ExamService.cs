@@ -558,7 +558,7 @@ namespace ExamEdu.Services
         {
             return _db.Exams.Where(s => s.ExamId == examId && s.IsCancelled == false).Any();
         }
-            
+
         public async Task<int> CancelExam(int examId)
         {
             var examFound = await _db.Exams.Where(e => e.ExamId == examId).FirstOrDefaultAsync();
@@ -705,6 +705,27 @@ namespace ExamEdu.Services
                                 Proctor = e.Proctor,
                                 Supervisor = e.Supervisor,
                             }).FirstOrDefaultAsync();
+        }
+
+        public async Task<Tuple<int, IEnumerable<Exam>>> GetExamByProctorId(int proctorId, PaginationParameter paginationParameter)
+        {
+            var examList = await _db.Exams.Where(e => e.ProctorId == proctorId)
+                                .Select(e => new Exam
+                                {
+                                    ExamId = e.ExamId,
+                                    ExamName = e.ExamName,
+                                    Module = e.Module,
+                                    Description = e.Description,
+                                    Password = e.Password,
+                                    ExamDay = e.ExamDay,
+                                    DurationInMinute = e.DurationInMinute,
+                                    Room = e.Room,
+                                    isFinalExam = e.isFinalExam,
+                                    IsCancelled = e.IsCancelled,
+                                    Supervisor = e.Supervisor,
+                                })
+                                .ToListAsync();
+            return new Tuple<int, IEnumerable<Exam>>(examList.Count(), examList.GetPage(paginationParameter));
         }
     }
 }
