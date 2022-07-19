@@ -16,6 +16,7 @@ using ExamEdu.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace examedu.Controllers
 {
@@ -260,38 +261,32 @@ namespace examedu.Controllers
         }
 
         [HttpPost("images")]
-        public async Task<ActionResult> UploadImage([FromForm] QuestionImageInputList imageInputsList)
+        public async Task<ActionResult> UploadImage([FromForm] IFormFile[] inputs)
         {
-            if (imageInputsList.imageInputs == null)
+            // var imageInputsList = JsonConvert.DeserializeObject<List<QuestionImageInput>>(inputs);
+            if (inputs == null)
             {
                 return BadRequest(new ResponseDTO(400, "ImageList is null"));
             }
-            var listImageUrl = new List<QuestionImageResponse>();
-            
-            foreach (var input in imageInputsList.imageInputs)
+            // var listImageUrl = new List<QuestionImageResponse>();
+            var listImageUrl = new List<string>();
+
+            foreach (var input in inputs)
             {
-                if (input.image == null)
+                if (input == null)
                 {
                     return BadRequest(new ResponseDTO(400, "Image is null"));
                 }
-                if (input.image.Length == 0)
+                if (input.Length == 0)
                 {
                     return BadRequest(new ResponseDTO(400, "Image is empty"));
                 }
-                if (input.image.Length > 1048576)
-                {
-                    return BadRequest(new ResponseDTO(400, "Image is too large"));
-                }
-                if (input.image.FileName.Split('.').Last() != "png" && input.image.FileName.Split('.').Last() != "jpg" && input.image.FileName.Split('.').Last() != "jpeg")
+                if (input.FileName.Split('.').Last() != "png" && input.FileName.Split('.').Last() != "jpg" && input.FileName.Split('.').Last() != "jpeg")
                 {
                     return BadRequest(new ResponseDTO(400, "Image is not valid"));
                 }
-                string url = await _imgHelper.Upload(input.image);
-                listImageUrl.Add(new QuestionImageResponse
-                {
-                    index = input.index,
-                    imageUrl = url
-                });
+                string url = await _imgHelper.Upload(input);
+                listImageUrl.Add(url);
             }
             return Ok(listImageUrl);
         }
