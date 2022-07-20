@@ -110,9 +110,11 @@ namespace examedu.Services
                               select new Student
                               {
                                   StudentId = student.StudentId,
-                                  Fullname = student.Fullname
+                                  Fullname = student.Fullname,
+                                  Email = student.Email,
                               };
-            var students = await queryResult.ToListAsync();
+
+            var students = await queryResult.Distinct().ToListAsync();
             return Tuple.Create(students.Count, students.GetPage(paginationParameter));
         }
 
@@ -197,7 +199,7 @@ namespace examedu.Services
 
             //var distinctStudents = students.Distinct().ToList();
 
-            var distinctStudents = queryResult.Distinct().ToList();
+            var distinctStudents =await queryResult.Distinct().ToListAsync();
 
             return Tuple.Create(distinctStudents.Count, distinctStudents.GetPage(paginationParameter));
         }
