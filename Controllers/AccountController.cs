@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -11,12 +12,15 @@ using examedu.Services.Account;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO;
 using ExamEdu.DTO.PaginationDTO;
+using ExamEdu.Helper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 
 namespace examedu.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
@@ -91,6 +95,12 @@ namespace examedu.Controllers
                 return BadRequest(new ResponseDTO(400, "Error when add account"));
             }
             return CreatedAtAction(nameof(GetAccountList), new ResponseDTO(201, "Successfully inserted"));
+        }
+        [HttpPost("excel")]
+        public async Task<ActionResult> CreateNewAccountByExcel([FromForm] IFormFile excelFile)
+        {
+            await _accountService.convertExcelToAccountInputList(excelFile);
+            return Ok();
         }
 
         /// <summary>
