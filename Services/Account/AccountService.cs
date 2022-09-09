@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,11 +10,14 @@ using BackEnd.DTO.AccountDTO;
 using BackEnd.DTO.Email;
 using BackEnd.Helper.Email;
 using examedu.DTO.AccountDTO;
+using examedu.DTO.ExcelDTO;
 using ExamEdu.DB;
 using ExamEdu.DB.Models;
 using ExamEdu.DTO.PaginationDTO;
 using ExamEdu.Helper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 
 namespace examedu.Services.Account
 {
@@ -417,6 +421,68 @@ namespace examedu.Services.Account
                 default:
                     return rowUpdated;
             }
+        }
+
+        public async Task<Tuple<List<CellErrorInfor>, List<AccountInput>>> convertExcelToAccountInputList(IFormFile excelFile)
+        {
+            List<AccountInput> listAccountReturn = new List<AccountInput>();
+            List<CellErrorInfor> cellErrorInfors = new List<CellErrorInfor>();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ExcelPackage.LicenseContext = LicenseContext.Commercial;
+                await excelFile.CopyToAsync(ms);
+
+                using (ExcelPackage package = new ExcelPackage(ms))
+                {
+                    ExcelWorksheet workSheet = package.Workbook.Worksheets[0];
+                    var totalRows = workSheet.Dimension.Rows;
+                    var totalColumn = workSheet.Dimension.Columns;
+
+                    for (int i = 2; i <= totalRows; i++)
+                    {
+                        AccountInput tempAccount = new AccountInput();
+
+                        try
+                        {
+                            tempAccount.Email = workSheet.Cells[i, 1].Value.ToString();
+                        }
+                        catch (System.Exception)
+                        {
+                            cellErrorInfors.Add(new CellErrorInfor
+                            {
+                                RowIndex = i,
+                                ColumnIndex = 1,
+                                ErrorDetail = "The cell does not have value"
+                            });
+                        }
+
+                        try
+                        {
+                            tempAccount.Fullname = workSheet.Cells[i, 2].Value.ToString();
+                        }
+                        catch (System.Exception)
+                        {
+                            cellErrorInfors.Add(new CellErrorInfor
+                            {
+                                RowIndex = i,
+                                ColumnIndex = 2,
+                                ErrorDetail = "The cell does not have value"
+                            });
+                        }
+                        if (!_emailHelper.IsValidEmail(tempAccount.Email))
+                        {
+                            cellErrorInfors.Add(new CellErrorInfor
+                            {
+                                RowIndex = i,
+                                ColumnIndex = 1,
+                                ErrorDetail = "The email is not in valid format"
+                            });
+                        }
+                        listAccountReturn.Add(tempAccount);
+                    }
+                }
+            }
+            return Tuple.Create(new List<CellErrorInfor>(), listAccountReturn);
         }
     }
 }
