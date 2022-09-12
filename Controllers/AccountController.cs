@@ -7,6 +7,7 @@ using AutoMapper;
 using BackEnd.DTO.AccountDTO;
 using BackEnd.Services;
 using examedu.DTO.AccountDTO;
+using examedu.DTO.ExcelDTO;
 using examedu.Services;
 using examedu.Services.Account;
 using ExamEdu.DB.Models;
@@ -97,10 +98,29 @@ namespace examedu.Controllers
             return CreatedAtAction(nameof(GetAccountList), new ResponseDTO(201, "Successfully inserted"));
         }
         [HttpPost("excel")]
-        public async Task<ActionResult> CreateNewAccountByExcel([FromForm] IFormFile excelFile)
+        public async Task<ActionResult> CreateNewAccountByExcel([FromForm] IFormFile excelFile, int roleId)
         {
-            await _accountService.convertExcelToAccountInputList(excelFile);
-            return Ok();
+            var convertResult = await _accountService.convertExcelToAccountInputList(excelFile); 
+            //item1 = list error; item2 = list account (su dung khi item1 length == 0)
+            if (convertResult.Item1.Count > 0)
+            {
+                return BadRequest(convertResult.Item1);
+            }
+
+            foreach (var account in convertResult.Item2)
+            {
+                account.RoleID = roleId;
+            }
+            var insertResult = await _accountService.InsertListAccount(convertResult.Item2);
+            if (insertResult.Item2.Count > 0)
+            {
+                return BadRequest(insertResult.Item2);
+            }
+            if (insertResult.Item1 == convertResult.Item2.Count)
+            {
+                return Ok( new ResponseDTO(201, "Successfully inserted"));
+            }
+            return BadRequest(new ResponseDTO(400, "Error when inserted, upload again for more detail"));
         }
 
         /// <summary>
