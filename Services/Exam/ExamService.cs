@@ -527,7 +527,7 @@ namespace ExamEdu.Services
 
         public async Task<Tuple<int, IEnumerable<Exam>>> GetAllExam(PaginationParameter paginationParameter)
         {
-            string searchName= paginationParameter.SearchName;
+            string searchName = paginationParameter.SearchName;
             searchName = searchName.Replace(":*|", " ").Replace(":*", "");
             searchName = ConvertToUnsign(searchName);
             var queryResult = from e in _db.Exams
@@ -722,7 +722,10 @@ namespace ExamEdu.Services
 
         public async Task<Tuple<int, IEnumerable<Exam>>> GetExamByProctorId(int proctorId, PaginationParameter paginationParameter)
         {
-            var examList = await _db.Exams.Where(e => e.ProctorId == proctorId)
+            var examList = await _db.Exams
+                                .Where(e => e.ProctorId == proctorId && 
+                                        (e.ExamName.ToUpper().Contains(paginationParameter.SearchName.ToUpper()) 
+                                        || e.Module.ModuleCode.ToUpper().Contains(paginationParameter.SearchName.ToUpper())))
                                 .Select(e => new Exam
                                 {
                                     ExamId = e.ExamId,
