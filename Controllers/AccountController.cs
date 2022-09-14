@@ -98,7 +98,7 @@ namespace examedu.Controllers
             return CreatedAtAction(nameof(GetAccountList), new ResponseDTO(201, "Successfully inserted"));
         }
         [HttpPost("excel")]
-        public async Task<ActionResult> CreateNewAccountByExcel([FromForm] IFormFile excelFile, int roleId)
+        public async Task<ActionResult> CreateNewAccountByExcel([FromForm] IFormFile excelFile,[FromForm] int roleId)
         {
             var convertResult = await _accountService.convertExcelToAccountInputList(excelFile); 
             //item1 = list error; item2 = list account (su dung khi item1 length == 0)
