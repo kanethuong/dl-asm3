@@ -21,7 +21,7 @@ using OfficeOpenXml;
 
 namespace examedu.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
