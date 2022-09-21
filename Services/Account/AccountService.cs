@@ -539,7 +539,7 @@ namespace examedu.Services.Account
                 {
                     cellErrorInfors.Add(new CellErrorInfor
                     {
-                        RowIndex = item2.Index,
+                        RowIndex = item2.Index+2,
                         ColumnIndex = 1,
                         ErrorDetail = "The email is duplicate"
                     });
