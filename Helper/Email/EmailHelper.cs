@@ -49,16 +49,20 @@ namespace BackEnd.Helper.Email
 
                 // Port & Login to Mail account
                 smtpClient.Port = _emailConfig.MailPort;
+                smtpClient.UseDefaultCredentials = false;
                 smtpClient.Credentials = new System.Net.NetworkCredential(_emailConfig.MailAddress, _emailConfig.MailPassword);
                 smtpClient.EnableSsl = true;
 
                 // Send email
                 await smtpClient.SendMailAsync(mail);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new Exception("Email send failed");
+                throw ex;
             }
+            // {
+            //     throw new Exception("Email send failed");
+            // }
         }
         public bool IsValidEmail(string email)
         {
