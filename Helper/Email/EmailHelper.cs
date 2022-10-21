@@ -56,13 +56,10 @@ namespace BackEnd.Helper.Email
                 // Send email
                 await smtpClient.SendMailAsync(mail);
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw new Exception("Email send failed");
             }
-            // {
-            //     throw new Exception("Email send failed");
-            // }
         }
         public bool IsValidEmail(string email)
         {
