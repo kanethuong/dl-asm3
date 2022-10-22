@@ -370,6 +370,12 @@ namespace ExamEdu.Services
         /// </returns>
         public async Task<Tuple<int, int>> CreateExamInfo(Exam exam)
         {
+            //verify exam name is unique
+            if(_db.Exams.Any(e => e.ExamName.Equals(exam.ExamName)))
+            {
+                throw new Exception("Exam name already exist");
+            }
+
             //Insert exam to database
             await _db.Exams.AddAsync(exam);
             int result = await _db.SaveChangesAsync();
@@ -481,6 +487,12 @@ namespace ExamEdu.Services
         /// <returns></returns>
         public async Task<int> UpdateExam(Exam exam)
         {
+            //Checking exam name is unique
+            if(_db.Exams.Any(e => e.ExamName.Equals(exam.ExamName)))
+            {
+                throw new Exception("Exam name already exist");
+            }
+
             _db.Exams.Attach(exam);
             var entry = _db.Entry(exam);
 
@@ -532,7 +544,7 @@ namespace ExamEdu.Services
             searchName = ConvertToUnsign(searchName);
             var queryResult = from e in _db.Exams
                               join m in _db.Modules on e.ModuleId equals m.ModuleId
-                              where e.ExamName.Contains(searchName) || m.ModuleCode.Contains(searchName)
+                              where e.ExamName.ToLower().Contains(searchName.ToLower()) || m.ModuleCode.ToLower().Contains(searchName.ToLower())
                               orderby e.ExamDay descending
                               select new Exam
                               {
