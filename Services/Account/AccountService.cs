@@ -451,6 +451,13 @@ namespace examedu.Services.Account
         public async Task<int> UpdateAccount(UpdateAccountInput accountInput, int roleId, string currEmail)
         {
             int rowUpdated = 0;
+
+            PaginationParameter paginationParameter = new PaginationParameter { PageNumber = 1, PageSize = 1, SearchName = accountInput.Email };
+            if (GetAccountList(paginationParameter).Item1 >= 1 || GetDeactivatedAccountList(paginationParameter).Item1 >= 1)
+            {
+                return -2;
+            }
+
             switch (roleId)
             {
                 case 1:
