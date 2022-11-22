@@ -251,6 +251,20 @@ namespace examedu.Services.Account
                     {
                         return 1;
                     }
+                case 5:
+                    var HeadOfDepToAdd = _mapper.Map<Teacher>(accountInput);
+                    HeadOfDepToAdd.RoleId = accountInput.RoleID;
+                    HeadOfDepToAdd.Password = processPasswordAndSendEmail(HeadOfDepToAdd.Email);
+                    HeadOfDepToAdd.isHeadOfDepartment = true;
+                    _dataContext.Teachers.Add(HeadOfDepToAdd);
+                    if (await _dataContext.SaveChangesAsync() != 1)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
                 default:
                     return -1;
             }
