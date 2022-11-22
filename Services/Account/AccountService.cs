@@ -253,7 +253,7 @@ namespace examedu.Services.Account
                     }
                 case 5:
                     var HeadOfDepToAdd = _mapper.Map<Teacher>(accountInput);
-                    HeadOfDepToAdd.RoleId = accountInput.RoleID;
+                    HeadOfDepToAdd.RoleId = 2; //role teacher id
                     HeadOfDepToAdd.Password = processPasswordAndSendEmail(HeadOfDepToAdd.Email);
                     HeadOfDepToAdd.isHeadOfDepartment = true;
                     _dataContext.Teachers.Add(HeadOfDepToAdd);
