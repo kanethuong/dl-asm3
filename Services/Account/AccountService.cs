@@ -70,7 +70,14 @@ namespace examedu.Services.Account
             foreach (var item in teachers)
             {
                 var itemToResponse = _mapper.Map<AccountResponse>(item);
-                itemToResponse.RoleName = getRoleName(item.RoleId);
+                if (item.isHeadOfDepartment)
+                {
+                    itemToResponse.RoleName = "Head Of Department";
+                }
+                else
+                {
+                    itemToResponse.RoleName = getRoleName(item.RoleId);
+                }
                 totalAccount.Add(itemToResponse);
             }
 
