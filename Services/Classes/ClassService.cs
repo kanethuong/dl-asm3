@@ -74,6 +74,12 @@ namespace examedu.Services.Classes
             int rowInserted = 0;
             try
             {
+                var studentInputList = new List<Student>();
+                foreach (var student in classInput.Students)
+                {
+                    studentInputList.Add(_db.Students.Where(s => s.StudentId == student.StudentId).FirstOrDefault());
+                }
+                classInput.Students = studentInputList;
                 _db.Classes.Add(classInput);
                 rowInserted = await _db.SaveChangesAsync();
             }

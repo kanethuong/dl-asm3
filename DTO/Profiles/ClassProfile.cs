@@ -15,7 +15,9 @@ namespace ExamEdu.DTO.Profiles
             CreateMap<ModuleTeacherStudentInput, ClassModule>()
                 .ForMember(dest => dest.Class_Module_Students, opt => opt.MapFrom(src => src.StudentIds.Select(id => new Class_Module_Student() { StudentId = id })));
             CreateMap<CreateClassInput, Class>()
-                .ForMember(dest => dest.ClassModules, opt => opt.MapFrom(src => src.ModuleTeacherStudentIds));
+                .ForMember(dest => dest.ClassModules, opt => opt.MapFrom(src => src.ModuleTeacherStudentIds))
+                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.ModuleTeacherStudentIds.SelectMany(m => m.StudentIds).Distinct()
+                                                                                .Select(id => new Student() { StudentId = id })));
             CreateMap<ClassModule, ClassModuleResponse2>();
             CreateMap<Class,ClassResponse>();
             CreateMap<ClassBasicInforInput,Class>(); 

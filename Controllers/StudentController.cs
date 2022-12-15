@@ -48,7 +48,7 @@ namespace examedu.Controllers
             List<ModuleMarkDTO> listResult = await _studentService.getModuleMark(studentId, moduleId);
             if (listResult == null)
             {
-                return BadRequest(new ResponseDTO(400, "StudentID or ModuleID not exist"));
+                return BadRequest(new ResponseDTO(400, "Student ID or Module ID not exist"));
             }
             if (listResult.Count == 0)
             {
