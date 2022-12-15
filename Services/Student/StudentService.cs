@@ -256,7 +256,8 @@ namespace examedu.Services
                                 ColumnIndex = 1,
                                 ErrorDetail = "The email is not in valid format"
                             });
-                        }else if (await _dataContext.Students.Where(m => m.Email == tempEmail && m.DeactivatedAt==null).FirstOrDefaultAsync() == null)
+                        }
+                        else if (await _dataContext.Students.Where(m => m.Email == tempEmail && m.DeactivatedAt == null).FirstOrDefaultAsync() == null)
                         {
                             cellErrorInfors.Add(new CellErrorInfor
                             {
@@ -273,6 +274,12 @@ namespace examedu.Services
                 }
                 return Tuple.Create(cellErrorInfors, listStudentClassReturn);
             }
+        }
+
+        public bool CheckStudentInAnyClass(int studentId)
+        {
+            return _dataContext.Students.Any(t => t.StudentId == studentId &&
+                                                 t.DeactivatedAt == null && t.ClassId != null);
         }
     }
 }

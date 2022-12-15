@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.DTO.ClassDTO;
@@ -92,15 +93,15 @@ namespace examedu.Controllers
         }
 
         [HttpGet("students/{classId:int}")]
-        public async Task<IActionResult> GetAllStudentOfClass(int classId, [FromQuery]PaginationParameter paginationParameter)
+        public async Task<IActionResult> GetAllStudentOfClass(int classId, [FromQuery] PaginationParameter paginationParameter)
         {
             bool isClassExist = await _classService.IsClassExist(classId);
 
-            if(!isClassExist)
+            if (!isClassExist)
             {
                 return NotFound(new ResponseDTO(404, "Class not found"));
             }
-            
+
             //Query for students
             var studentsQueryResult = await _classService.GetAllStudentOfClass(classId, paginationParameter);
 
@@ -124,6 +125,11 @@ namespace examedu.Controllers
                     if (_studentService.CheckStudentExist(studentId) == false)
                     {
                         return NotFound(new ResponseDTO(404, "Student not exist"));
+                    }
+
+                    if(_studentService.CheckStudentInAnyClass(studentId) == true)
+                    {
+                        return BadRequest(new ResponseDTO(400, "Student is already in another class"));
                     }
                 }
             }
@@ -201,7 +207,7 @@ namespace examedu.Controllers
             return Ok(classResponse);
 
         }
-        
+
         [HttpPut("update/basic_infor")]
         public async Task<ActionResult> UpdateClassBasicInfor([FromBody] ClassBasicInforInput input)
         {
