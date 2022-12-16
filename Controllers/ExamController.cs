@@ -198,6 +198,19 @@ namespace ExamEdu.Controllers
 
             return Ok(new PaginationResponse<IEnumerable<StudentMarkResponse>>(totalRecord, studentMarkResponse));
         }
+
+        [HttpGet("student/{examId:int}")]
+        public async Task<IActionResult> GetStudentInExam(int examId, [FromQuery] PaginationParameter paginationParameter)
+        {
+            (int totalRecord, IEnumerable<StudentMarkResponse> studentMarkResponse) = await _examService.GetStudentListInExamByExamId(examId, paginationParameter);
+
+            if (totalRecord == 0)
+            {
+                return NotFound(new ResponseDTO(404, "Student not found"));
+            }
+
+            return Ok(new PaginationResponse<IEnumerable<StudentMarkResponse>>(totalRecord, studentMarkResponse));
+        }
         [HttpGet("result/report/{examId:int}/{classModuleId:int}")]
         public async Task<ActionResult> ExportExamMarkReport(int examId, int classModuleId)
         {
