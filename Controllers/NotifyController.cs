@@ -14,8 +14,8 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace examedu.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
+    // [ApiController]
+    // [Route("api/[controller]")]
     public class NotifyController : ControllerBase
     {
      

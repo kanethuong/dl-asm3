@@ -112,16 +112,16 @@ namespace ExamEdu
             services.AddScoped<IExamQuestionsService, ExamQuestionsService>();
             services.AddScoped<IClassModuleService, ClassModuleService>();
             services.AddScoped<IClassService, ClassService>();
-            services.AddScoped<ICacheProvider,CacheProvider>();
+            // services.AddScoped<ICacheProvider,CacheProvider>();
             services.AddScoped<IAcademicDepartmentService, AcademicDepartmentService>();
-            services.AddScoped<IAdministratorService,AdministratorService>();
+            services.AddScoped<IAdministratorService, AdministratorService>();
             services.AddScoped<IImgHelper, ImgHelper>();
             services.AddScoped<ICheatService, CheatService>();
 
             services.AddSignalR();
 
             //Config redis for using signalR
-            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(Configuration.GetSection("Redis").Get<RedisConfiguration>());
+            // services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(Configuration.GetSection("Redis").Get<RedisConfiguration>());
 
             services.AddControllers().AddJsonOptions(options =>
             {
@@ -193,7 +193,16 @@ namespace ExamEdu
             var frontEndUrl = Configuration["FrontEndUrl"];
 
             //CORS config for Front-end url
-            app.UseCors(options => options.WithOrigins(frontEndDevUrl,frontEndUrl)
+            // app.UseCors(options => options.WithOrigins(frontEndDevUrl,frontEndUrl)
+            //                             .AllowAnyMethod()
+            //                             .AllowAnyHeader()
+            //                             .AllowCredentials());
+
+            app.UseCors(options => options.SetIsOriginAllowed(origin =>
+                                                origin == frontEndDevUrl ||
+                                                origin == frontEndUrl ||
+                                                origin.Contains(".ngrok-free.app") // dynamically allow any ngrok subdomain
+                                            )
                                         .AllowAnyMethod()
                                         .AllowAnyHeader()
                                         .AllowCredentials());
